@@ -1,0 +1,25 @@
+root_cause: code_bug
+version: "1.0"
+manual_only: false
+assertions:
+  - id: target-unhandled-exception-rate
+    source: prometheus
+    query_template: 'sum(rate(unhandled_exceptions_total{service="{{ service }}",target="{{ target }}"}[5m]))'
+    evidence_level: direct
+    weight: 0.8
+    expectation: {operator: greater_than, threshold: 0.01}
+  - id: target-stack-trace-logs
+    source: loki
+    query_template: '{service="{{ service }}",target="{{ target }}"} |= "Traceback"'
+    evidence_level: supporting
+    weight: 0.2
+    expectation: {operator: min_hits, threshold: 1}
+counter_evidence:
+  - id: target-no-unhandled-exceptions
+    source: prometheus
+    query_template: 'sum(rate(unhandled_exceptions_total{service="{{ service }}",target="{{ target }}"}[5m]))'
+    weight: 0.8
+    expectation: {operator: less_than, threshold: 0.001}
+decision: {minimum_score: 0.65, require_direct_evidence: true, maximum_counter_evidence: 0.3}
+next_strategies: {inconclusive: [expand_error_window], contradicted: [test_dependency_failure]}
+recovery: {settle_seconds: 30, observation_seconds: 120, consecutive_samples: 3}

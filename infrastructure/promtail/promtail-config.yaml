@@ -1,0 +1,42 @@
+# =============================================================================
+# AIOps Agent Platform - Promtail Config (Dev Only)
+# =============================================================================#
+# 采集 /var/lib/docker/containers 下的所有容器日志，
+# 自动添加 job / service 标签后推送到 Loki。
+# =============================================================================
+
+server:
+  http_listen_port: 9080
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # ---- Docker 容器日志 ----
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container'
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_service']
+        target_label: 'service'
+      - source_labels: ['__meta_docker_container_log_stream']
+        target_label: 'stream'
+    pipeline_stages:
+      - docker: {}
+
+  # ---- 后端文件日志（可选，方便本地调试） ----
+  - job_name: backend
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: aiops-backend
+          service: aiops-backend
+          __path__: /app/logs/*.log

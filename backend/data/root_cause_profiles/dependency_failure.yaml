@@ -1,0 +1,25 @@
+root_cause: dependency_failure
+version: "1.0"
+manual_only: false
+assertions:
+  - id: target-upstream-errors
+    source: prometheus
+    query_template: 'sum(rate(upstream_request_errors_total{service="{{ service }}",target="{{ target }}"}[5m]))'
+    evidence_level: direct
+    weight: 0.8
+    expectation: {operator: greater_than, threshold: 0.05}
+  - id: target-upstream-timeout-logs
+    source: loki
+    query_template: '{service="{{ service }}",target="{{ target }}"} |= "upstream timeout"'
+    evidence_level: supporting
+    weight: 0.2
+    expectation: {operator: min_hits, threshold: 1}
+counter_evidence:
+  - id: target-upstream-healthy
+    source: health
+    query_template: 'upstream_health{service="{{ service }}",target="{{ target }}"}'
+    weight: 0.8
+    expectation: {operator: contains, threshold: healthy}
+decision: {minimum_score: 0.65, require_direct_evidence: true, maximum_counter_evidence: 0.3}
+next_strategies: {inconclusive: [expand_dependency_window], contradicted: [test_recent_deployment]}
+recovery: {settle_seconds: 30, observation_seconds: 120, consecutive_samples: 3}

@@ -1,0 +1,25 @@
+root_cause: configuration_change
+version: "1.0"
+manual_only: false
+assertions:
+  - id: target-config-reload-failures
+    source: prometheus
+    query_template: 'sum(rate(config_reload_failures_total{service="{{ service }}",target="{{ target }}"}[15m]))'
+    evidence_level: direct
+    weight: 0.8
+    expectation: {operator: greater_than, threshold: 0}
+  - id: target-config-error-logs
+    source: loki
+    query_template: '{service="{{ service }}",target="{{ target }}"} |= "configuration error"'
+    evidence_level: supporting
+    weight: 0.2
+    expectation: {operator: min_hits, threshold: 1}
+counter_evidence:
+  - id: target-config-valid
+    source: health
+    query_template: 'configuration_health{service="{{ service }}",target="{{ target }}"}'
+    weight: 0.8
+    expectation: {operator: contains, threshold: healthy}
+decision: {minimum_score: 0.65, require_direct_evidence: true, maximum_counter_evidence: 0.3}
+next_strategies: {inconclusive: [expand_config_window], contradicted: [test_recent_deployment]}
+recovery: {settle_seconds: 30, observation_seconds: 120, consecutive_samples: 3}

@@ -1,0 +1,25 @@
+root_cause: recent_deployment
+version: "1.0"
+manual_only: false
+assertions:
+  - id: target-deployment-just-completed
+    source: prometheus
+    query_template: 'max(deployment_age_seconds{service="{{ service }}",target="{{ target }}"})'
+    evidence_level: direct
+    weight: 0.7
+    expectation: {operator: less_than, threshold: 1800}
+  - id: target-errors-after-deployment
+    source: loki
+    query_template: '{service="{{ service }}",target="{{ target }}"} |= "deployment failed"'
+    evidence_level: supporting
+    weight: 0.3
+    expectation: {operator: min_hits, threshold: 1}
+counter_evidence:
+  - id: target-no-recent-deployment
+    source: prometheus
+    query_template: 'min(deployment_age_seconds{service="{{ service }}",target="{{ target }}"})'
+    weight: 0.8
+    expectation: {operator: greater_than, threshold: 86400}
+decision: {minimum_score: 0.65, require_direct_evidence: true, maximum_counter_evidence: 0.3}
+next_strategies: {inconclusive: [expand_deployment_window], contradicted: [test_configuration_change]}
+recovery: {settle_seconds: 30, observation_seconds: 120, consecutive_samples: 3}

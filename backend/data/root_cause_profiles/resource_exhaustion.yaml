@@ -1,0 +1,25 @@
+root_cause: resource_exhaustion
+version: "1.0"
+manual_only: false
+assertions:
+  - id: target-resource-saturation
+    source: prometheus
+    query_template: 'max(resource_utilization_percent{service="{{ service }}",target="{{ target }}"})'
+    evidence_level: direct
+    weight: 0.8
+    expectation: {operator: greater_than, threshold: 90}
+  - id: target-oom-events
+    source: loki
+    query_template: '{service="{{ service }}",target="{{ target }}"} |= "OOMKilled"'
+    evidence_level: supporting
+    weight: 0.2
+    expectation: {operator: min_hits, threshold: 1}
+counter_evidence:
+  - id: target-resources-normal
+    source: prometheus
+    query_template: 'max(resource_utilization_percent{service="{{ service }}",target="{{ target }}"})'
+    weight: 0.8
+    expectation: {operator: less_than, threshold: 70}
+decision: {minimum_score: 0.65, require_direct_evidence: true, maximum_counter_evidence: 0.3}
+next_strategies: {inconclusive: [expand_resource_window], contradicted: [test_dependency_failure]}
+recovery: {settle_seconds: 30, observation_seconds: 120, consecutive_samples: 3}

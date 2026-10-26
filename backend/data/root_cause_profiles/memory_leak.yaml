@@ -1,0 +1,25 @@
+root_cause: memory_leak
+version: "1.0"
+manual_only: false
+assertions:
+  - id: target-memory-growth
+    source: prometheus
+    query_template: 'delta(container_memory_working_set_bytes{service="{{ service }}",target="{{ target }}"}[30m])'
+    evidence_level: direct
+    weight: 0.8
+    expectation: {operator: greater_than, threshold: 104857600}
+  - id: target-memory-pressure
+    source: loki
+    query_template: '{service="{{ service }}",target="{{ target }}"} |= "memory pressure"'
+    evidence_level: supporting
+    weight: 0.2
+    expectation: {operator: min_hits, threshold: 1}
+counter_evidence:
+  - id: target-memory-stable
+    source: prometheus
+    query_template: 'delta(container_memory_working_set_bytes{service="{{ service }}",target="{{ target }}"}[30m])'
+    weight: 0.8
+    expectation: {operator: less_than, threshold: 10485760}
+decision: {minimum_score: 0.65, require_direct_evidence: true, maximum_counter_evidence: 0.3}
+next_strategies: {inconclusive: [expand_memory_window], contradicted: [test_traffic_spike]}
+recovery: {settle_seconds: 30, observation_seconds: 120, consecutive_samples: 3}

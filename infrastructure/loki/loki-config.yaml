@@ -1,0 +1,49 @@
+# =============================================================================
+# AIOps Agent Platform - Loki Local Config (Single-Binary, Dev Only)
+# =============================================================================#
+# 用于 docker-compose dev 环境：单进程模式，文件系统存储。
+# 生产环境请使用官方推荐的 S3/GCS + 分布式部署配置。
+# =============================================================================
+
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+
+common:
+  instance_addr: 127.0.0.1
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+schema_config:
+  configs:
+    - from: 2024-01-01
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+limits_config:
+  retention_period: 168h   # 7 天
+  allow_structured_metadata: true
+  ingestion_rate_mb: 16
+  ingestion_burst_size_mb: 24
+  max_entries_limit_per_query: 5000
+
+ruler:
+  storage:
+    type: local
+    local:
+      directory: /loki/rules
+
+frontend:
+  max_outstanding_per_tenant: 2048

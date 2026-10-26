@@ -1,0 +1,4935 @@
+{
+  "_meta": {
+    "version": "v1",
+    "eval_split": "dev",
+    "generated_at": "2026-09-01T02:37:34.502157+00:00",
+    "count": 111,
+    "last_added": "aiopslab"
+  },
+  "badcases": [
+    {
+      "id": "bc-aiops2020-020",
+      "created_at": "2026-09-01T00:45:33.568278Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "lb-tier",
+        "metric_name": "backend_request_skew_pct",
+        "value": 75.0,
+        "threshold": 20.0,
+        "unit": "percent",
+        "host": "lb-01",
+        "duration_s": 600
+      },
+      "evidence": {
+        "kpi_history": [
+          10,
+          12,
+          20,
+          35,
+          55,
+          70,
+          75,
+          75
+        ],
+        "backend_traffic_distribution": [
+          45000,
+          8000,
+          5500,
+          11000,
+          9000
+        ],
+        "lb_algorithm": "round_robin"
+      },
+      "category": "single_metric",
+      "type": "load_balancer_skew",
+      "expected_root_cause": "load_balancer_skew_due_to_sticky_session",
+      "expected_confidence_min": 0.7,
+      "severity": "medium",
+      "tags": [
+        "single_metric",
+        "load_balancer_skew"
+      ],
+      "description": "负载均衡请求分布严重倾斜",
+      "badcase_class": "load_balancer_skew",
+      "identified_flaw": "sticky session 配置导致请求分布不均",
+      "keywords_for_retrieval": [
+        "lb",
+        "skew",
+        "round_robin",
+        "sticky"
+      ],
+      "suggestion_or_lesson": "sticky session 配置导致请求分布不均",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/case_128"
+    },
+    {
+      "id": "bc-aiops2020-015",
+      "created_at": "2026-09-01T00:45:33.568257Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "batch-runner",
+        "metric_name": "zombie_process_count",
+        "value": 250,
+        "threshold": 10,
+        "unit": "processes",
+        "host": "batch-01",
+        "duration_s": 7200
+      },
+      "evidence": {
+        "kpi_history": [
+          5,
+          20,
+          50,
+          100,
+          150,
+          200,
+          240,
+          250
+        ],
+        "parent_pid_mismatch": 150,
+        "pid_max_used_pct": 78
+      },
+      "category": "single_metric",
+      "type": "zombie_process",
+      "expected_root_cause": "zombie_process_accumulation_due_to_sigchld_handler_missing",
+      "expected_confidence_min": 0.7,
+      "severity": "medium",
+      "tags": [
+        "single_metric",
+        "zombie_process"
+      ],
+      "description": "批处理服务僵尸进程累积",
+      "badcase_class": "zombie_process",
+      "identified_flaw": "父进程未正确处理 SIGCHLD",
+      "keywords_for_retrieval": [
+        "zombie",
+        "process",
+        "sigchld",
+        "batch"
+      ],
+      "suggestion_or_lesson": "父进程未正确处理 SIGCHLD",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/case_092"
+    },
+    {
+      "id": "bc-aiops2020-011",
+      "created_at": "2026-09-01T00:45:33.568239Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "worker-svc",
+        "metric_name": "active_threads",
+        "value": 200,
+        "threshold": 150,
+        "unit": "threads",
+        "host": "worker-03",
+        "duration_s": 240
+      },
+      "evidence": {
+        "kpi_history": [
+          120,
+          130,
+          140,
+          155,
+          170,
+          185,
+          195,
+          200
+        ],
+        "queue_size": 12500,
+        "task_avg_duration_ms": 2300
+      },
+      "category": "single_metric",
+      "type": "threadpool_exhaust",
+      "expected_root_cause": "thread_pool_exhausted_due_to_slow_external_call",
+      "expected_confidence_min": 0.7,
+      "severity": "high",
+      "tags": [
+        "single_metric",
+        "threadpool_exhaust"
+      ],
+      "description": "Worker 服务线程池耗尽，任务积压",
+      "badcase_class": "threadpool_exhaust",
+      "identified_flaw": "外部 API 调用慢，占满线程池",
+      "keywords_for_retrieval": [
+        "thread",
+        "pool",
+        "queue",
+        "exhaust"
+      ],
+      "suggestion_or_lesson": "外部 API 调用慢，占满线程池",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/case_063"
+    },
+    {
+      "id": "bc-aiops2020-027",
+      "created_at": "2026-09-01T00:45:33.568315Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "session-svc",
+        "metric_name": "heap_used_mb",
+        "value": 7000,
+        "threshold": 6144,
+        "unit": "MB",
+        "host": "session-02",
+        "duration_s": 3600
+      },
+      "evidence": {
+        "kpi_history": [
+          5500,
+          5800,
+          6200,
+          6500,
+          6800,
+          7000,
+          7200,
+          7200
+        ],
+        "previous_fixed_in": "v1.8.0_session_ttl_fix",
+        "recent_change": "new_feature_add_without_ttl"
+      },
+      "category": "regression_guard",
+      "type": "reg_memory_leak",
+      "expected_root_cause": "memory_leak_regression_new_feature_no_ttl",
+      "expected_confidence_min": 0.8,
+      "severity": "high",
+      "tags": [
+        "regression_guard",
+        "reg_memory_leak"
+      ],
+      "description": "回归：新功能没设 TTL，重新触发内存泄漏",
+      "badcase_class": "reg_memory_leak",
+      "identified_flaw": "v1.9.0 新增功能引入未设 TTL 的 session",
+      "keywords_for_retrieval": [
+        "regression",
+        "memory_leak",
+        "ttl",
+        "new_feature"
+      ],
+      "suggestion_or_lesson": "v1.9.0 新增功能引入未设 TTL 的 session",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/regression_002"
+    },
+    {
+      "id": "bc-aiops2020-023",
+      "created_at": "2026-09-01T00:45:33.568298Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "long-running-svc",
+        "metric_name": "heap_used_mb",
+        "value": 7500,
+        "threshold": 6000,
+        "unit": "MB",
+        "host": "longrun-02",
+        "duration_s": 1800
+      },
+      "evidence": {
+        "heap_used_mb": 7500,
+        "gc_pause_p99_ms": 2300,
+        "active_threads": 180,
+        "thread_pool_queue_size": 4500
+      },
+      "category": "compound",
+      "type": "memory_leak_gc_thread",
+      "expected_root_cause": "compound_memory_leak_cascading_to_gc_and_thread_pool",
+      "expected_confidence_min": 0.75,
+      "severity": "high",
+      "tags": [
+        "compound",
+        "memory_leak_gc_thread"
+      ],
+      "description": "内存泄漏导致 GC 暂停，进而线程池阻塞",
+      "badcase_class": "memory_leak_gc_thread",
+      "identified_flaw": "内存泄漏 → 长 GC → 线程被阻塞 → 请求堆积",
+      "keywords_for_retrieval": [
+        "compound",
+        "memory_leak",
+        "gc",
+        "thread_pool"
+      ],
+      "suggestion_or_lesson": "内存泄漏 → 长 GC → 线程被阻塞 → 请求堆积",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/compound_003"
+    },
+    {
+      "id": "bc-aiops2020-007",
+      "created_at": "2026-09-01T00:45:33.568222Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "event-pipeline",
+        "metric_name": "kafka_consumer_lag",
+        "value": 580000,
+        "threshold": 100000,
+        "unit": "messages",
+        "host": "kafka-consumer-04",
+        "duration_s": 900
+      },
+      "evidence": {
+        "kpi_history": [
+          50000,
+          80000,
+          150000,
+          280000,
+          400000,
+          500000,
+          550000,
+          580000
+        ],
+        "consumer_throughput_per_sec": 1200,
+        "produce_throughput_per_sec": 4500
+      },
+      "category": "single_metric",
+      "type": "kafka_lag",
+      "expected_root_cause": "kafka_consumer_lag_due_to_slow_downstream_db",
+      "expected_confidence_min": 0.7,
+      "severity": "high",
+      "tags": [
+        "single_metric",
+        "kafka_lag"
+      ],
+      "description": "Kafka 消费者延迟，下游数据库写入慢",
+      "badcase_class": "kafka_lag",
+      "identified_flaw": "下游 DB batch insert 性能退化",
+      "keywords_for_retrieval": [
+        "kafka",
+        "lag",
+        "consumer",
+        "throughput"
+      ],
+      "suggestion_or_lesson": "下游 DB batch insert 性能退化",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/case_040"
+    },
+    {
+      "id": "bc-aiops2020-006",
+      "created_at": "2026-09-01T00:45:33.568217Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "cache-svc",
+        "metric_name": "redis_used_memory_mb",
+        "value": 12288.0,
+        "threshold": 8192.0,
+        "unit": "MB",
+        "host": "redis-cluster-3",
+        "duration_s": 180
+      },
+      "evidence": {
+        "kpi_history": [
+          8000,
+          8500,
+          9200,
+          10000,
+          11000,
+          11800,
+          12100,
+          12288
+        ],
+        "evicted_keys_per_sec": 8500,
+        "hit_ratio_pct": 62
+      },
+      "category": "single_metric",
+      "type": "redis_oom",
+      "expected_root_cause": "redis_oom_eviction_cascading_to_miss_storm",
+      "expected_confidence_min": 0.75,
+      "severity": "critical",
+      "tags": [
+        "single_metric",
+        "redis_oom"
+      ],
+      "description": "Redis 集群内存爆，被迫驱逐大量 key",
+      "badcase_class": "redis_oom",
+      "identified_flaw": "上游新接入业务写入大量临时 key，无 TTL",
+      "keywords_for_retrieval": [
+        "redis",
+        "oom",
+        "eviction",
+        "miss_storm"
+      ],
+      "suggestion_or_lesson": "上游新接入业务写入大量临时 key，无 TTL",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/case_031"
+    },
+    {
+      "id": "bc-aiops2020-013",
+      "created_at": "2026-09-01T00:45:33.568248Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "storage-svc",
+        "metric_name": "io_wait_pct",
+        "value": 65.0,
+        "threshold": 20.0,
+        "unit": "percent",
+        "host": "storage-02",
+        "duration_s": 600
+      },
+      "evidence": {
+        "kpi_history": [
+          10,
+          15,
+          25,
+          40,
+          55,
+          60,
+          63,
+          65
+        ],
+        "disk_queue_depth": 85,
+        "read_iops": 12000
+      },
+      "category": "single_metric",
+      "type": "io_wait_high",
+      "expected_root_cause": "disk_io_saturation_due_to_large_scan",
+      "expected_confidence_min": 0.7,
+      "severity": "medium",
+      "tags": [
+        "single_metric",
+        "io_wait_high"
+      ],
+      "description": "存储服务 IO 等待高，全表扫描触发",
+      "badcase_class": "io_wait_high",
+      "identified_flaw": "缺失索引导致全表扫描",
+      "keywords_for_retrieval": [
+        "io",
+        "wait",
+        "scan",
+        "index"
+      ],
+      "suggestion_or_lesson": "缺失索引导致全表扫描",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/case_078"
+    },
+    {
+      "id": "bc-aiops2020-012",
+      "created_at": "2026-09-01T00:45:33.568244Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "nginx-lb",
+        "metric_name": "open_file_descriptors",
+        "value": 65535,
+        "threshold": 50000,
+        "unit": "fds",
+        "host": "nginx-01",
+        "duration_s": 180
+      },
+      "evidence": {
+        "kpi_history": [
+          40000,
+          45000,
+          50000,
+          55000,
+          60000,
+          64000,
+          65535,
+          65535
+        ],
+        "active_connections": 60000,
+        "error_log": "Too many open files"
+      },
+      "category": "single_metric",
+      "type": "fd_exhaust",
+      "expected_root_cause": "file_descriptor_exhausted_due_to_connection_leak",
+      "expected_confidence_min": 0.75,
+      "severity": "high",
+      "tags": [
+        "single_metric",
+        "fd_exhaust"
+      ],
+      "description": "Nginx LB 文件描述符耗尽",
+      "badcase_class": "fd_exhaust",
+      "identified_flaw": "上游 keep-alive 连接未及时关闭",
+      "keywords_for_retrieval": [
+        "fd",
+        "file_descriptor",
+        "nginx",
+        "keepalive"
+      ],
+      "suggestion_or_lesson": "上游 keep-alive 连接未及时关闭",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/case_071"
+    },
+    {
+      "id": "bc-aiops2020-016",
+      "created_at": "2026-09-01T00:45:33.568262Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "checkout-svc",
+        "metric_name": "http_5xx_rate",
+        "value": 18.0,
+        "threshold": 1.0,
+        "unit": "percent",
+        "host": "checkout-02",
+        "duration_s": 120
+      },
+      "evidence": {
+        "kpi_history": [
+          0.5,
+          0.8,
+          2.0,
+          8.0,
+          13,
+          17,
+          18,
+          18
+        ],
+        "downstream_errors": {
+          "payment-svc": 4500,
+          "inventory-svc": 2200
+        },
+        "error_codes": {
+          "502": 1200,
+          "504": 3000,
+          "500": 300
+        }
+      },
+      "category": "single_metric",
+      "type": "5xx_error_spike",
+      "expected_root_cause": "5xx_spike_due_to_downstream_payment_timeout",
+      "expected_confidence_min": 0.75,
+      "severity": "high",
+      "tags": [
+        "single_metric",
+        "5xx_error_spike"
+      ],
+      "description": "结账服务 5xx 错误率激增",
+      "badcase_class": "5xx_error_spike",
+      "identified_flaw": "下游 payment-svc 超时导致级联失败",
+      "keywords_for_retrieval": [
+        "5xx",
+        "error",
+        "downstream",
+        "timeout"
+      ],
+      "suggestion_or_lesson": "下游 payment-svc 超时导致级联失败",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/case_098"
+    },
+    {
+      "id": "bc-aiops2020-010",
+      "created_at": "2026-09-01T00:45:33.568235Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "api-gateway",
+        "metric_name": "tls_handshake_error_rate",
+        "value": 22.0,
+        "threshold": 2.0,
+        "unit": "percent",
+        "host": "gateway-01",
+        "duration_s": 300
+      },
+      "evidence": {
+        "kpi_history": [
+          0.5,
+          1.0,
+          5.0,
+          12,
+          18,
+          22,
+          22,
+          21
+        ],
+        "cert_expiry_days": -1,
+        "ssl_error_codes": [
+          "CERT_HAS_EXPIRED"
+        ]
+      },
+      "category": "single_metric",
+      "type": "tls_handshake_fail",
+      "expected_root_cause": "tls_certificate_expired",
+      "expected_confidence_min": 0.95,
+      "severity": "critical",
+      "tags": [
+        "single_metric",
+        "tls_handshake_fail"
+      ],
+      "description": "API 网关 TLS 握手失败率激增",
+      "badcase_class": "tls_handshake_fail",
+      "identified_flaw": "证书过期未及时续签",
+      "keywords_for_retrieval": [
+        "tls",
+        "ssl",
+        "certificate",
+        "expiry"
+      ],
+      "suggestion_or_lesson": "证书过期未及时续签",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/case_058"
+    },
+    {
+      "id": "bc-aiops2020-026",
+      "created_at": "2026-09-01T00:45:33.568311Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "order-svc",
+        "metric_name": "db_connection_pool_active",
+        "value": 92.0,
+        "threshold": 90.0,
+        "unit": "connections",
+        "host": "db-master-01",
+        "duration_s": 60
+      },
+      "evidence": {
+        "kpi_history": [
+          85,
+          88,
+          90,
+          91,
+          92,
+          92,
+          92,
+          92
+        ],
+        "previous_fixed_in": "v2.3.1_pool_increase_to_150",
+        "recent_deployment": "v2.4.0_rolled_back_v2.3.1"
+      },
+      "category": "regression_guard",
+      "type": "reg_db_pool",
+      "expected_root_cause": "db_connection_pool_regression_after_rollback",
+      "expected_confidence_min": 0.85,
+      "severity": "high",
+      "tags": [
+        "regression_guard",
+        "reg_db_pool"
+      ],
+      "description": "回归：之前修过的连接池问题，rollback 后复发",
+      "badcase_class": "reg_db_pool",
+      "identified_flaw": "v2.4.0 部署后又 rollback 到 v2.3.1，引入新 bug",
+      "keywords_for_retrieval": [
+        "regression",
+        "db_pool",
+        "rollback"
+      ],
+      "suggestion_or_lesson": "v2.4.0 部署后又 rollback 到 v2.3.1，引入新 bug",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/regression_001"
+    },
+    {
+      "id": "bc-aiops2020-030",
+      "created_at": "2026-09-01T00:45:33.568327Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "product-svc",
+        "metric_name": "cache_hit_ratio",
+        "value": 30.0,
+        "threshold": 80.0,
+        "unit": "percent",
+        "host": "product-01",
+        "duration_s": 600
+      },
+      "evidence": {
+        "kpi_history": [
+          88,
+          82,
+          60,
+          40,
+          32,
+          30,
+          30,
+          30
+        ],
+        "previous_fixed_in": "v2.0.0_warmup_on_restart",
+        "recent_change": "warmup_script_removed"
+      },
+      "category": "regression_guard",
+      "type": "reg_cache_cold_start",
+      "expected_root_cause": "cache_cold_start_regression_warmup_removed",
+      "expected_confidence_min": 0.8,
+      "severity": "high",
+      "tags": [
+        "regression_guard",
+        "reg_cache_cold_start"
+      ],
+      "description": "回归：缓存预热脚本被移除",
+      "badcase_class": "reg_cache_cold_start",
+      "identified_flaw": "v2.1.0 移除了缓存预热脚本，重启后冷启动",
+      "keywords_for_retrieval": [
+        "regression",
+        "cache",
+        "cold_start",
+        "warmup"
+      ],
+      "suggestion_or_lesson": "v2.1.0 移除了缓存预热脚本，重启后冷启动",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/regression_005"
+    },
+    {
+      "id": "bc-aiops2020-022",
+      "created_at": "2026-09-01T00:45:33.568291Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "checkout-svc",
+        "metric_name": "error_rate",
+        "value": 12.0,
+        "threshold": 1.0,
+        "unit": "percent",
+        "host": "checkout-01",
+        "duration_s": 300
+      },
+      "evidence": {
+        "dns_resolution_failure_pct": 25,
+        "db_query_latency_p99_ms": 3200,
+        "http_5xx_rate": 12,
+        "circuit_breaker_open": true
+      },
+      "category": "compound",
+      "type": "network_dns_db",
+      "expected_root_cause": "compound_dns_failure_triggering_db_query_timeout",
+      "expected_confidence_min": 0.7,
+      "severity": "critical",
+      "tags": [
+        "compound",
+        "network_dns_db"
+      ],
+      "description": "DNS 失败 + DB 查询超时 + 5xx 错误，同时触发熔断",
+      "badcase_class": "network_dns_db",
+      "identified_flaw": "DNS 解析失败导致 DB 连接超时，触发熔断器开启",
+      "keywords_for_retrieval": [
+        "compound",
+        "dns",
+        "db_timeout",
+        "circuit_breaker"
+      ],
+      "suggestion_or_lesson": "DNS 解析失败导致 DB 连接超时，触发熔断器开启",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/compound_002"
+    },
+    {
+      "id": "bc-aiops2020-017",
+      "created_at": "2026-09-01T00:45:33.568266Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "email-svc",
+        "metric_name": "queue_depth",
+        "value": 250000,
+        "threshold": 50000,
+        "unit": "messages",
+        "host": "email-01",
+        "duration_s": 1800
+      },
+      "evidence": {
+        "kpi_history": [
+          30000,
+          40000,
+          60000,
+          100000,
+          150000,
+          200000,
+          240000,
+          250000
+        ],
+        "consumer_throughput_per_sec": 100,
+        "produce_throughput_per_sec": 450
+      },
+      "category": "single_metric",
+      "type": "queue_backlog",
+      "expected_root_cause": "queue_backlog_due_to_slow_smtp_provider",
+      "expected_confidence_min": 0.7,
+      "severity": "medium",
+      "tags": [
+        "single_metric",
+        "queue_backlog"
+      ],
+      "description": "邮件服务队列堆积",
+      "badcase_class": "queue_backlog",
+      "identified_flaw": "SMTP 提供商限速，下游消费慢",
+      "keywords_for_retrieval": [
+        "queue",
+        "backlog",
+        "smtp",
+        "consumer"
+      ],
+      "suggestion_or_lesson": "SMTP 提供商限速，下游消费慢",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/case_104"
+    },
+    {
+      "id": "bc-aiops2020-028",
+      "created_at": "2026-09-01T00:45:33.568319Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "cache-svc",
+        "metric_name": "redis_used_memory_mb",
+        "value": 10000,
+        "threshold": 8192,
+        "unit": "MB",
+        "host": "redis-cluster-3",
+        "duration_s": 1800
+      },
+      "evidence": {
+        "kpi_history": [
+          8000,
+          8500,
+          9000,
+          9500,
+          9800,
+          10000,
+          10100,
+          10100
+        ],
+        "previous_fixed_in": "v3.2.0_add_redis_maxmemory_policy",
+        "recent_change": "config_rollback_to_old_policy"
+      },
+      "category": "regression_guard",
+      "type": "reg_redis_oom",
+      "expected_root_cause": "redis_oom_regression_config_rollback",
+      "expected_confidence_min": 0.75,
+      "severity": "high",
+      "tags": [
+        "regression_guard",
+        "reg_redis_oom"
+      ],
+      "description": "回归：Redis maxmemory 配置被 rollback",
+      "badcase_class": "reg_redis_oom",
+      "identified_flaw": "运维误操作 rollback 了 Redis 配置",
+      "keywords_for_retrieval": [
+        "regression",
+        "redis",
+        "oom",
+        "rollback"
+      ],
+      "suggestion_or_lesson": "运维误操作 rollback 了 Redis 配置",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/regression_003"
+    },
+    {
+      "id": "bc-aiops2020-002",
+      "created_at": "2026-09-01T00:45:33.568175Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "recommend-svc",
+        "metric_name": "cpu_usage_percent",
+        "value": 98.0,
+        "threshold": 85.0,
+        "unit": "percent",
+        "host": "recs-03",
+        "duration_s": 600
+      },
+      "evidence": {
+        "kpi_history": [
+          60,
+          70,
+          80,
+          88,
+          93,
+          96,
+          98,
+          98
+        ],
+        "thread_count": 480,
+        "gc_pause_ms": 230,
+        "hot_method": "computeSimilarity()"
+      },
+      "category": "single_metric",
+      "type": "cpu_saturation",
+      "expected_root_cause": "cpu_hotspot_in_similarity_compute",
+      "expected_confidence_min": 0.75,
+      "severity": "high",
+      "tags": [
+        "single_metric",
+        "cpu_saturation"
+      ],
+      "description": "推荐服务 CPU 饱和，单方法热点",
+      "badcase_class": "cpu_saturation",
+      "identified_flaw": "computeSimilarity() 是 O(n²) 在用户量增大后成为热点",
+      "keywords_for_retrieval": [
+        "cpu",
+        "hotspot",
+        "thread",
+        "gc"
+      ],
+      "suggestion_or_lesson": "computeSimilarity() 是 O(n²) 在用户量增大后成为热点",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/case_007"
+    },
+    {
+      "id": "bc-aiops2020-014",
+      "created_at": "2026-09-01T00:45:33.568252Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "report-svc",
+        "metric_name": "gc_pause_p99_ms",
+        "value": 4500,
+        "threshold": 500,
+        "unit": "ms",
+        "host": "report-04",
+        "duration_s": 300
+      },
+      "evidence": {
+        "kpi_history": [
+          200,
+          300,
+          800,
+          2000,
+          3500,
+          4200,
+          4500,
+          4400
+        ],
+        "old_gen_size_mb": 6500,
+        "young_gen_size_mb": 800
+      },
+      "category": "single_metric",
+      "type": "gc_pause_long",
+      "expected_root_cause": "long_gc_pause_due_to_old_gen_full",
+      "expected_confidence_min": 0.75,
+      "severity": "medium",
+      "tags": [
+        "single_metric",
+        "gc_pause_long"
+      ],
+      "description": "报表服务 GC 暂停时间过长",
+      "badcase_class": "gc_pause_long",
+      "identified_flaw": "老年代过大，Full GC 频繁",
+      "keywords_for_retrieval": [
+        "gc",
+        "pause",
+        "old_gen",
+        "full"
+      ],
+      "suggestion_or_lesson": "老年代过大，Full GC 频繁",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/case_085"
+    },
+    {
+      "id": "bc-aiops2020-019",
+      "created_at": "2026-09-01T00:45:33.568274Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "product-svc",
+        "metric_name": "cache_hit_ratio",
+        "value": 22.0,
+        "threshold": 80.0,
+        "unit": "percent",
+        "host": "product-01",
+        "duration_s": 300
+      },
+      "evidence": {
+        "kpi_history": [
+          92,
+          88,
+          70,
+          45,
+          30,
+          25,
+          22,
+          22
+        ],
+        "redis_qps": 85000,
+        "db_qps": 45000
+      },
+      "category": "single_metric",
+      "type": "cache_miss_storm",
+      "expected_root_cause": "cache_cold_start_after_redis_restart",
+      "expected_confidence_min": 0.8,
+      "severity": "high",
+      "tags": [
+        "single_metric",
+        "cache_miss_storm"
+      ],
+      "description": "商品服务缓存命中率断崖式下跌",
+      "badcase_class": "cache_miss_storm",
+      "identified_flaw": "Redis 集群刚重启，缓存重新冷启动",
+      "keywords_for_retrieval": [
+        "cache",
+        "miss",
+        "cold_start",
+        "redis"
+      ],
+      "suggestion_or_lesson": "Redis 集群刚重启，缓存重新冷启动",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/case_120"
+    },
+    {
+      "id": "bc-aiops2020-003",
+      "created_at": "2026-09-01T00:45:33.568198Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "session-svc",
+        "metric_name": "heap_used_mb",
+        "value": 8192.0,
+        "threshold": 6144.0,
+        "unit": "MB",
+        "host": "session-02",
+        "duration_s": 1800
+      },
+      "evidence": {
+        "kpi_history": [
+          4096,
+          4500,
+          5000,
+          5500,
+          6200,
+          7000,
+          7700,
+          8192
+        ],
+        "gc_overhead_pct": 28,
+        "old_gen_growth_mb_per_hour": 600
+      },
+      "category": "single_metric",
+      "type": "memory_leak",
+      "expected_root_cause": "heap_memory_leak_in_session_cache",
+      "expected_confidence_min": 0.8,
+      "severity": "critical",
+      "tags": [
+        "single_metric",
+        "memory_leak"
+      ],
+      "description": "会话服务堆内存持续增长，老年代 GC 开销高",
+      "badcase_class": "memory_leak",
+      "identified_flaw": "session cache 未设置 TTL，僵尸 session 累积",
+      "keywords_for_retrieval": [
+        "memory",
+        "leak",
+        "heap",
+        "gc"
+      ],
+      "suggestion_or_lesson": "session cache 未设置 TTL，僵尸 session 累积",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/case_012"
+    },
+    {
+      "id": "bc-aiops2020-018",
+      "created_at": "2026-09-01T00:45:33.568270Z",
+      "source": "aiops2020",
+      "eval_split": "dev",
+      "alert": {
+        "service": "distributed-lock",
+        "metric_name": "clock_skew_ms",
+        "value": 8500,
+        "threshold": 100,
+        "unit": "ms",
+        "host": "lock-svc-02",
+        "duration_s": 600
+      },
+      "evidence": {
+        "kpi_history": [
+          50,
+          80,
+          200,
+          1500,
+          4000,
+          7000,
+          8500,
+          8500
+        ],
+        "ntp_sync_status": "failed",
+        "lock_contention_pct": 45
+      },
+      "category": "single_metric",
+      "type": "clock_skew",
+      "expected_root_cause": "clock_skew_due_to_ntp_sync_failure",
+      "expected_confidence_min": 0.85,
+      "severity": "high",
+      "tags": [
+        "single_metric",
+        "clock_skew"
+      ],
+      "description": "分布式锁服务时钟偏移",
+      "badcase_class": "clock_skew",
+      "identified_flaw": "NTP 同步失败，节点间时钟偏差大",
+      "keywords_for_retrieval": [
+        "clock",
+        "skew",
+        "ntp",
+        "lock"
+      ],
+      "suggestion_or_lesson": "NTP 同步失败，节点间时钟偏差大",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "aiops2020/dataset_c/case_112"
+    },
+    {
+      "id": "bc-loghub-020",
+      "created_at": "2026-09-01T00:46:47.777667Z",
+      "source": "loghub_hdfs",
+      "eval_split": "dev",
+      "alert": {
+        "service": "hdfs-namenode",
+        "metric_name": "heap_used_mb",
+        "value": 26000,
+        "threshold": 24000,
+        "unit": "MB",
+        "host": "namenode-01",
+        "duration_s": 3600
+      },
+      "evidence": {
+        "kpi_history": [
+          20000,
+          22000,
+          24000,
+          25000,
+          26000,
+          26500,
+          26000,
+          26000
+        ],
+        "previous_fixed_in": "v2.5.0_files_compaction_job",
+        "recent_change": "compaction_cron_disabled_by_mistake"
+      },
+      "category": "regression_guard",
+      "type": "reg_namenode_heap",
+      "expected_root_cause": "regression_namenode_compaction_disabled",
+      "expected_confidence_min": 0.75,
+      "severity": "high",
+      "tags": [
+        "regression_guard",
+        "reg_namenode_heap",
+        "loghub"
+      ],
+      "description": "回归：NameNode 文件压缩任务被禁用",
+      "badcase_class": "reg_namenode_heap",
+      "identified_flaw": "Cron 任务被禁用，小文件累积导致堆压力",
+      "keywords_for_retrieval": [
+        "regression",
+        "hdfs",
+        "namenode",
+        "compaction"
+      ],
+      "suggestion_or_lesson": "Cron 任务被禁用，小文件累积导致堆压力",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "loghub/HDFS_v1/regression_002"
+    },
+    {
+      "id": "bc-loghub-006",
+      "created_at": "2026-09-01T00:46:47.777298Z",
+      "source": "loghub_hdfs",
+      "eval_split": "dev",
+      "alert": {
+        "service": "hdfs-client",
+        "metric_name": "permission_denied_count",
+        "value": 350,
+        "threshold": 10,
+        "unit": "errors",
+        "host": "client-app-01",
+        "duration_s": 600
+      },
+      "evidence": {
+        "log_samples": [
+          "ERROR: Permission denied: user=hadoop, access=WRITE, inode=/data/raw",
+          "WARN: org.apache.hadoop.security.AccessControlException"
+        ],
+        "log_count_error": 350
+      },
+      "category": "single_metric",
+      "type": "permission_denied",
+      "expected_root_cause": "hdfs_permission_denied_due_to_misconfigured_acl",
+      "expected_confidence_min": 0.85,
+      "severity": "medium",
+      "tags": [
+        "single_metric",
+        "permission_denied",
+        "loghub"
+      ],
+      "description": "HDFS 权限拒绝错误激增",
+      "badcase_class": "permission_denied",
+      "identified_flaw": "ACL 配置错误，新用户无写权限",
+      "keywords_for_retrieval": [
+        "hdfs",
+        "permission",
+        "acl",
+        "denied"
+      ],
+      "suggestion_or_lesson": "ACL 配置错误，新用户无写权限",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "loghub/HDFS_v1/permission_001"
+    },
+    {
+      "id": "bc-loghub-015",
+      "created_at": "2026-09-01T00:46:47.777644Z",
+      "source": "loghub_hdfs",
+      "eval_split": "dev",
+      "alert": {
+        "service": "hdfs-datanode",
+        "metric_name": "io_exception_count",
+        "value": 450,
+        "threshold": 20,
+        "unit": "exceptions",
+        "host": "datanode-07",
+        "duration_s": 600
+      },
+      "evidence": {
+        "log_samples": [
+          "ERROR: IOException: BlockReceiver write failed",
+          "WARN: Packet write to disk failed"
+        ],
+        "log_count_error": 450,
+        "disk_health": "degraded"
+      },
+      "category": "single_metric",
+      "type": "io_exception_during_write",
+      "expected_root_cause": "datanode_disk_io_exception_degraded_disk_health",
+      "expected_confidence_min": 0.8,
+      "severity": "high",
+      "tags": [
+        "single_metric",
+        "io_exception_during_write",
+        "loghub"
+      ],
+      "description": "DataNode IO 异常激增，磁盘健康度下降",
+      "badcase_class": "io_exception_during_write",
+      "identified_flaw": "磁盘健康度降级，导致 IO 异常",
+      "keywords_for_retrieval": [
+        "hdfs",
+        "io_exception",
+        "disk_health",
+        "degraded"
+      ],
+      "suggestion_or_lesson": "磁盘健康度降级，导致 IO 异常",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "loghub/HDFS_v1/io_exception_001"
+    },
+    {
+      "id": "bc-loghub-005",
+      "created_at": "2026-09-01T00:46:47.777290Z",
+      "source": "loghub_hdfs",
+      "eval_split": "dev",
+      "alert": {
+        "service": "hdfs-namenode",
+        "metric_name": "heap_used_mb",
+        "value": 28000,
+        "threshold": 24000,
+        "unit": "MB",
+        "host": "namenode-01",
+        "duration_s": 1800
+      },
+      "evidence": {
+        "log_samples": [
+          "WARN: GC pause is taking longer than expected",
+          "INFO: NameNode heap usage at 87%"
+        ],
+        "gc_pause_p99_ms": 8500,
+        "files_total": 85000000
+      },
+      "category": "single_metric",
+      "type": "namenode_heap",
+      "expected_root_cause": "namenode_heap_pressure_due_to_many_small_files",
+      "expected_confidence_min": 0.8,
+      "severity": "high",
+      "tags": [
+        "single_metric",
+        "namenode_heap",
+        "loghub"
+      ],
+      "description": "NameNode 堆内存压力",
+      "badcase_class": "namenode_heap",
+      "identified_flaw": "小文件过多，NameNode 内存压力大",
+      "keywords_for_retrieval": [
+        "namenode",
+        "heap",
+        "gc",
+        "small_files"
+      ],
+      "suggestion_or_lesson": "小文件过多，NameNode 内存压力大",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "loghub/HDFS_v1/namenode_heap_001"
+    },
+    {
+      "id": "bc-loghub-010",
+      "created_at": "2026-09-01T00:46:47.777622Z",
+      "source": "loghub_hdfs",
+      "eval_split": "dev",
+      "alert": {
+        "service": "hdfs-datanode",
+        "metric_name": "block_report_failure_rate",
+        "value": 25.0,
+        "threshold": 5.0,
+        "unit": "percent",
+        "host": "datanode-02",
+        "duration_s": 1800
+      },
+      "evidence": {
+        "log_samples": [
+          "ERROR: Block report submission failed",
+          "WARN: Exception in blockReport"
+        ],
+        "log_count_error": 85,
+        "failed_reports": 12
+      },
+      "category": "single_metric",
+      "type": "block_report_failure",
+      "expected_root_cause": "datanode_block_report_failure_due_to_network_instability",
+      "expected_confidence_min": 0.7,
+      "severity": "medium",
+      "tags": [
+        "single_metric",
+        "block_report_failure",
+        "loghub"
+      ],
+      "description": "DataNode 块报告失败",
+      "badcase_class": "block_report_failure",
+      "identified_flaw": "网络抖动，块报告 RPC 失败",
+      "keywords_for_retrieval": [
+        "hdfs",
+        "block_report",
+        "rpc",
+        "network"
+      ],
+      "suggestion_or_lesson": "网络抖动，块报告 RPC 失败",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "loghub/HDFS_v1/block_report_001"
+    },
+    {
+      "id": "bc-loghub-014",
+      "created_at": "2026-09-01T00:46:47.777640Z",
+      "source": "loghub_hdfs",
+      "eval_split": "dev",
+      "alert": {
+        "service": "hdfs-namenode",
+        "metric_name": "decommission_in_progress",
+        "value": 3,
+        "threshold": 0,
+        "unit": "nodes",
+        "host": "namenode-01",
+        "duration_s": 7200
+      },
+      "evidence": {
+        "log_samples": [
+          "INFO: Decommissioning datanode-09",
+          "WARN: Decommission taking longer than expected"
+        ],
+        "log_count_info": 50,
+        "log_count_warn": 200,
+        "under_replicated_growth": 1200
+      },
+      "category": "single_metric",
+      "type": "data_node_decommission",
+      "expected_root_cause": "decommission_slow_due_to_high_block_density",
+      "expected_confidence_min": 0.7,
+      "severity": "medium",
+      "tags": [
+        "single_metric",
+        "data_node_decommission",
+        "loghub"
+      ],
+      "description": "DataNode 下线进行中，副本迁移慢",
+      "badcase_class": "data_node_decommission",
+      "identified_flaw": "下线节点块密度高，迁移慢",
+      "keywords_for_retrieval": [
+        "hdfs",
+        "decommission",
+        "slow",
+        "block_density"
+      ],
+      "suggestion_or_lesson": "下线节点块密度高，迁移慢",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "loghub/HDFS_v1/decommission_001"
+    },
+    {
+      "id": "bc-loghub-016",
+      "created_at": "2026-09-01T00:46:47.777648Z",
+      "source": "loghub_hdfs",
+      "eval_split": "dev",
+      "alert": {
+        "service": "hdfs-cluster",
+        "metric_name": "cluster_write_failure_rate",
+        "value": 18.0,
+        "threshold": 1.0,
+        "unit": "percent",
+        "host": "hdfs-cluster",
+        "duration_s": 1800
+      },
+      "evidence": {
+        "namenode_heap_used_mb": 27000,
+        "datanode_offline_count": 2,
+        "under_replicated_blocks": 4500,
+        "log_samples": [
+          "WARN: NameNode heap pressure",
+          "ERROR: Datanode-08 unreachable"
+        ]
+      },
+      "category": "compound",
+      "type": "name_dn_compound",
+      "expected_root_cause": "compound_namenode_heap_plus_datanode_offline",
+      "expected_confidence_min": 0.7,
+      "severity": "high",
+      "tags": [
+        "compound",
+        "name_dn_compound",
+        "loghub"
+      ],
+      "description": "NameNode 堆压力 + DataNode 离线 复合故障",
+      "badcase_class": "name_dn_compound",
+      "identified_flaw": "DataNode 离线 → 副本补充触发 NameNode 高负载",
+      "keywords_for_retrieval": [
+        "compound",
+        "hdfs",
+        "namenode_heap",
+        "datanode_offline"
+      ],
+      "suggestion_or_lesson": "DataNode 离线 → 副本补充触发 NameNode 高负载",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "loghub/HDFS_v1/compound_001"
+    },
+    {
+      "id": "bc-loghub-019",
+      "created_at": "2026-09-01T00:46:47.777663Z",
+      "source": "loghub_hdfs",
+      "eval_split": "dev",
+      "alert": {
+        "service": "hdfs-namenode",
+        "metric_name": "under_replicated_blocks",
+        "value": 1800,
+        "threshold": 100,
+        "unit": "blocks",
+        "host": "namenode-01",
+        "duration_s": 1800
+      },
+      "evidence": {
+        "kpi_history": [
+          50,
+          80,
+          200,
+          800,
+          1500,
+          1800,
+          1800,
+          1800
+        ],
+        "previous_fixed_in": "v3.1.0_increase_replication_priority",
+        "recent_change": "config_priority_downgraded_to_low"
+      },
+      "category": "regression_guard",
+      "type": "reg_under_replicated",
+      "expected_root_cause": "regression_replication_priority_downgraded",
+      "expected_confidence_min": 0.8,
+      "severity": "high",
+      "tags": [
+        "regression_guard",
+        "reg_under_replicated",
+        "loghub"
+      ],
+      "description": "回归：副本复制优先级被降低",
+      "badcase_class": "reg_under_replicated",
+      "identified_flaw": "运维误调低复制优先级",
+      "keywords_for_retrieval": [
+        "regression",
+        "hdfs",
+        "replication",
+        "priority"
+      ],
+      "suggestion_or_lesson": "运维误调低复制优先级",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "loghub/HDFS_v1/regression_001"
+    },
+    {
+      "id": "bc-loghub-007",
+      "created_at": "2026-09-01T00:46:47.777303Z",
+      "source": "loghub_hdfs",
+      "eval_split": "dev",
+      "alert": {
+        "service": "hdfs-datanode",
+        "metric_name": "block_transfer_avg_ms",
+        "value": 4500,
+        "threshold": 200,
+        "unit": "ms",
+        "host": "datanode-05",
+        "duration_s": 900
+      },
+      "evidence": {
+        "log_samples": [
+          "WARN: Slow BlockReceiver write packet to mirror",
+          "INFO: PacketResponder N times for block blk_zzz"
+        ],
+        "slow_transfer_count": 1200,
+        "network_io_mbps": 12
+      },
+      "category": "single_metric",
+      "type": "slow_block_transfer",
+      "expected_root_cause": "hdfs_slow_block_transfer_due_to_disk_io_saturation",
+      "expected_confidence_min": 0.7,
+      "severity": "medium",
+      "tags": [
+        "single_metric",
+        "slow_block_transfer",
+        "loghub"
+      ],
+      "description": "DataNode 块传输慢",
+      "badcase_class": "slow_block_transfer",
+      "identified_flaw": "目标磁盘 IO 饱和，传输慢",
+      "keywords_for_retrieval": [
+        "hdfs",
+        "slow",
+        "transfer",
+        "disk_io"
+      ],
+      "suggestion_or_lesson": "目标磁盘 IO 饱和，传输慢",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "loghub/HDFS_v1/slow_transfer_001"
+    },
+    {
+      "id": "bc-loghub-013",
+      "created_at": "2026-09-01T00:46:47.777636Z",
+      "source": "loghub_hdfs",
+      "eval_split": "dev",
+      "alert": {
+        "service": "hdfs-client",
+        "metric_name": "file_close_failure_count",
+        "value": 250,
+        "threshold": 5,
+        "unit": "failures",
+        "host": "client-app-02",
+        "duration_s": 600
+      },
+      "evidence": {
+        "log_samples": [
+          "ERROR: Could not complete file close: blk_xxx",
+          "WARN: DFSOutputStream close failed"
+        ],
+        "log_count_error": 250,
+        "partial_blocks": 35
+      },
+      "category": "single_metric",
+      "type": "file_close_failure",
+      "expected_root_cause": "hdfs_file_close_failure_due_to_datanode_pipeline_broken",
+      "expected_confidence_min": 0.75,
+      "severity": "high",
+      "tags": [
+        "single_metric",
+        "file_close_failure",
+        "loghub"
+      ],
+      "description": "HDFS 文件关闭失败",
+      "badcase_class": "file_close_failure",
+      "identified_flaw": "DataNode pipeline 破裂，写入未完成",
+      "keywords_for_retrieval": [
+        "hdfs",
+        "file_close",
+        "pipeline",
+        "broken"
+      ],
+      "suggestion_or_lesson": "DataNode pipeline 破裂，写入未完成",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "loghub/HDFS_v1/file_close_001"
+    },
+    {
+      "id": "bc-loghub-018",
+      "created_at": "2026-09-01T00:46:47.777658Z",
+      "source": "loghub_hdfs",
+      "eval_split": "dev",
+      "alert": {
+        "service": "hdfs-cluster",
+        "metric_name": "compound_network_io_degraded",
+        "value": 1,
+        "threshold": 0,
+        "unit": "boolean",
+        "host": "hdfs-cluster",
+        "duration_s": 1800
+      },
+      "evidence": {
+        "block_transfer_avg_ms": 4200,
+        "inter_dn_timeout_count": 80,
+        "slow_disk_io_pct": 65,
+        "log_samples": [
+          "ERROR: InterDataNodeTimeoutException",
+          "WARN: Slow BlockReceiver write"
+        ]
+      },
+      "category": "compound",
+      "type": "network_io_compound",
+      "expected_root_cause": "compound_network_jitter_and_disk_io_slow",
+      "expected_confidence_min": 0.7,
+      "severity": "high",
+      "tags": [
+        "compound",
+        "network_io_compound",
+        "loghub"
+      ],
+      "description": "网络抖动 + 磁盘 IO 慢 复合",
+      "badcase_class": "network_io_compound",
+      "identified_flaw": "网络抖动 + 磁盘 IO 慢 同时发生",
+      "keywords_for_retrieval": [
+        "compound",
+        "hdfs",
+        "network",
+        "io_slow"
+      ],
+      "suggestion_or_lesson": "网络抖动 + 磁盘 IO 慢 同时发生",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "loghub/HDFS_v1/compound_003"
+    },
+    {
+      "id": "bc-loghub-011",
+      "created_at": "2026-09-01T00:46:47.777628Z",
+      "source": "loghub_hdfs",
+      "eval_split": "dev",
+      "alert": {
+        "service": "hdfs-datanode",
+        "metric_name": "inter_dn_timeout_count",
+        "value": 120,
+        "threshold": 5,
+        "unit": "timeouts",
+        "host": "datanode-06",
+        "duration_s": 600
+      },
+      "evidence": {
+        "log_samples": [
+          "ERROR: InterDataNodeTimeoutException",
+          "WARN: Timeout while writing to mirror"
+        ],
+        "log_count_error": 120,
+        "mirror_targets": [
+          "datanode-07",
+          "datanode-08"
+        ]
+      },
+      "category": "single_metric",
+      "type": "inter_datanode_timeout",
+      "expected_root_cause": "hdfs_inter_datanode_timeout_due_to_network_partition",
+      "expected_confidence_min": 0.75,
+      "severity": "high",
+      "tags": [
+        "single_metric",
+        "inter_datanode_timeout",
+        "loghub"
+      ],
+      "description": "DataNode 之间复制超时",
+      "badcase_class": "inter_datanode_timeout",
+      "identified_flaw": "机房网络分区，DataNode 互连超时",
+      "keywords_for_retrieval": [
+        "hdfs",
+        "inter_dn",
+        "timeout",
+        "partition"
+      ],
+      "suggestion_or_lesson": "机房网络分区，DataNode 互连超时",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "loghub/HDFS_v1/inter_dn_001"
+    },
+    {
+      "id": "bc-loghub-002",
+      "created_at": "2026-09-01T00:46:47.777264Z",
+      "source": "loghub_hdfs",
+      "eval_split": "dev",
+      "alert": {
+        "service": "hdfs-namenode",
+        "metric_name": "under_replicated_blocks",
+        "value": 2500,
+        "threshold": 100,
+        "unit": "blocks",
+        "host": "namenode-01",
+        "duration_s": 1800
+      },
+      "evidence": {
+        "log_samples": [
+          "WARN: Block blk_xxx is under-replicated. Target replicas: 3, current: 1",
+          "INFO: Started replication for blk_yyy"
+        ],
+        "log_count_warn": 2500,
+        "missing_replica_count": 1200
+      },
+      "category": "single_metric",
+      "type": "replica_under_replicated",
+      "expected_root_cause": "hdfs_under_replicated_due_to_datanode_offline",
+      "expected_confidence_min": 0.8,
+      "severity": "high",
+      "tags": [
+        "single_metric",
+        "replica_under_replicated",
+        "loghub"
+      ],
+      "description": "NameNode 副本不足告警",
+      "badcase_class": "replica_under_replicated",
+      "identified_flaw": "部分 DataNode 离线导致副本数不足",
+      "keywords_for_retrieval": [
+        "hdfs",
+        "replica",
+        "under_replicated",
+        "datanode"
+      ],
+      "suggestion_or_lesson": "部分 DataNode 离线导致副本数不足",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "loghub/HDFS_v1/replica_001"
+    },
+    {
+      "id": "bc-loghub-012",
+      "created_at": "2026-09-01T00:46:47.777632Z",
+      "source": "loghub_hdfs",
+      "eval_split": "dev",
+      "alert": {
+        "service": "hdfs-namenode",
+        "metric_name": "checkpoint_failure_count",
+        "value": 8,
+        "threshold": 0,
+        "unit": "failures",
+        "host": "namenode-01",
+        "duration_s": 7200
+      },
+      "evidence": {
+        "log_samples": [
+          "ERROR: Checkpoint failed: Could not upload fsimage",
+          "WARN: SecondaryNameNode checkpoint aborted"
+        ],
+        "log_count_error": 8,
+        "last_successful_checkpoint_h": 18
+      },
+      "category": "single_metric",
+      "type": "checkpoint_failure",
+      "expected_root_cause": "namenode_checkpoint_failure_due_to_snn_disk_full",
+      "expected_confidence_min": 0.7,
+      "severity": "high",
+      "tags": [
+        "single_metric",
+        "checkpoint_failure",
+        "loghub"
+      ],
+      "description": "NameNode checkpoint 失败",
+      "badcase_class": "checkpoint_failure",
+      "identified_flaw": "SecondaryNameNode 磁盘满，无法上传 fsimage",
+      "keywords_for_retrieval": [
+        "namenode",
+        "checkpoint",
+        "snn",
+        "fsimage"
+      ],
+      "suggestion_or_lesson": "SecondaryNameNode 磁盘满，无法上传 fsimage",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "loghub/HDFS_v1/checkpoint_001"
+    },
+    {
+      "id": "bc-smd-020",
+      "created_at": "2026-09-01T00:47:48.065712Z",
+      "source": "smd",
+      "eval_split": "dev",
+      "alert": {
+        "service": "smd-machine",
+        "metric_name": "established connections",
+        "value": 50000,
+        "threshold": 20000,
+        "unit": "conns",
+        "host": "machine-20-39",
+        "duration_s": 3600
+      },
+      "evidence": {
+        "kpi_history": [
+          5000,
+          8000,
+          15000,
+          25000,
+          35000,
+          45000,
+          48000,
+          50000
+        ],
+        "previous_fixed_in": "v2.0.0_connection_pool_max_20k",
+        "recent_change": "max_pool_size_unbounded_rollback"
+      },
+      "category": "regression_guard",
+      "type": "reg_connection_pool",
+      "expected_root_cause": "connection_pool_regression_unbounded_size",
+      "expected_confidence_min": 0.75,
+      "severity": "high",
+      "tags": [
+        "regression_guard",
+        "reg_connection_pool",
+        "smd"
+      ],
+      "description": "回归：连接池上限被取消",
+      "badcase_class": "reg_connection_pool",
+      "identified_flaw": "运维去掉连接池上限",
+      "keywords_for_retrieval": [
+        "regression",
+        "smd",
+        "connection_pool",
+        "unbounded"
+      ],
+      "suggestion_or_lesson": "运维去掉连接池上限",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "smd/machine-20-39/regression_002"
+    },
+    {
+      "id": "bc-smd-006",
+      "created_at": "2026-09-01T00:47:48.065410Z",
+      "source": "smd",
+      "eval_split": "dev",
+      "alert": {
+        "service": "smd-machine",
+        "metric_name": "swap usage",
+        "value": 4096,
+        "threshold": 100,
+        "unit": "MB",
+        "host": "machine-6-11",
+        "duration_s": 600
+      },
+      "evidence": {
+        "kpi_history": [
+          0,
+          50,
+          200,
+          800,
+          2000,
+          3000,
+          3500,
+          4096
+        ],
+        "memory_usage_pct": 92,
+        "swap_in_per_sec": 1200
+      },
+      "category": "single_metric",
+      "type": "memory_swap_high",
+      "expected_root_cause": "memory_pressure_triggering_swap",
+      "expected_confidence_min": 0.85,
+      "severity": "high",
+      "tags": [
+        "single_metric",
+        "memory_swap_high",
+        "smd"
+      ],
+      "description": "机器 6-11 swap 使用激增",
+      "badcase_class": "memory_swap_high",
+      "identified_flaw": "内存压力高，系统开始 swap",
+      "keywords_for_retrieval": [
+        "smd",
+        "swap",
+        "memory_pressure"
+      ],
+      "suggestion_or_lesson": "内存压力高，系统开始 swap",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "smd/machine-6-11/anomaly_006"
+    },
+    {
+      "id": "bc-smd-015",
+      "created_at": "2026-09-01T00:47:48.065691Z",
+      "source": "smd",
+      "eval_split": "dev",
+      "alert": {
+        "service": "smd-machine",
+        "metric_name": "memory_swap_compound",
+        "value": 1,
+        "threshold": 0,
+        "unit": "boolean",
+        "host": "machine-15-29",
+        "duration_s": 1800
+      },
+      "evidence": {
+        "memory_usage_pct": 95,
+        "swap_usage_mb": 4000,
+        "load_average": 35,
+        "kpi_history": [
+          40,
+          60,
+          80,
+          90,
+          95,
+          95,
+          95,
+          95
+        ]
+      },
+      "category": "compound",
+      "type": "memory_swap_compound",
+      "expected_root_cause": "compound_memory_leak_cascading_to_swap_and_load",
+      "expected_confidence_min": 0.75,
+      "severity": "high",
+      "tags": [
+        "compound",
+        "memory_swap_compound",
+        "smd"
+      ],
+      "description": "内存泄漏导致 swap + load 高",
+      "badcase_class": "memory_swap_compound",
+      "identified_flaw": "内存泄漏 → swap → load 高",
+      "keywords_for_retrieval": [
+        "compound",
+        "smd",
+        "memory_leak",
+        "swap",
+        "load"
+      ],
+      "suggestion_or_lesson": "内存泄漏 → swap → load 高",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "smd/machine-15-29/compound_001"
+    },
+    {
+      "id": "bc-smd-005",
+      "created_at": "2026-09-01T00:47:48.065402Z",
+      "source": "smd",
+      "eval_split": "dev",
+      "alert": {
+        "service": "smd-machine",
+        "metric_name": "CPU usage",
+        "value": 0.5,
+        "threshold": 5.0,
+        "unit": "percent",
+        "host": "machine-5-9",
+        "duration_s": 1800
+      },
+      "evidence": {
+        "kpi_history": [
+          60,
+          65,
+          70,
+          65,
+          50,
+          30,
+          10,
+          0.5
+        ],
+        "machine_id": "machine-5-9",
+        "process_running": false
+      },
+      "category": "single_metric",
+      "type": "cpu_drop_unexpected",
+      "expected_root_cause": "main_process_crashed_cpu_idle",
+      "expected_confidence_min": 0.85,
+      "severity": "critical",
+      "tags": [
+        "single_metric",
+        "cpu_drop_unexpected",
+        "smd"
+      ],
+      "description": "机器 5-9 CPU 降至 0.5%（主进程崩溃）",
+      "badcase_class": "cpu_drop_unexpected",
+      "identified_flaw": "应用主进程崩溃，CPU 空闲",
+      "keywords_for_retrieval": [
+        "smd",
+        "cpu",
+        "drop",
+        "crash"
+      ],
+      "suggestion_or_lesson": "应用主进程崩溃，CPU 空闲",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "smd/machine-5-9/anomaly_005"
+    },
+    {
+      "id": "bc-smd-010",
+      "created_at": "2026-09-01T00:47:48.065429Z",
+      "source": "smd",
+      "eval_split": "dev",
+      "alert": {
+        "service": "smd-machine",
+        "metric_name": "context switches per sec",
+        "value": 250000,
+        "threshold": 50000,
+        "unit": "cs_per_sec",
+        "host": "machine-10-19",
+        "duration_s": 300
+      },
+      "evidence": {
+        "kpi_history": [
+          20000,
+          30000,
+          80000,
+          150000,
+          200000,
+          240000,
+          245000,
+          250000
+        ],
+        "machine_id": "machine-10-19",
+        "running_threads": 4500
+      },
+      "category": "single_metric",
+      "type": "context_switch_spike",
+      "expected_root_cause": "context_switch_overhead_from_thread_bomb",
+      "expected_confidence_min": 0.7,
+      "severity": "high",
+      "tags": [
+        "single_metric",
+        "context_switch_spike",
+        "smd"
+      ],
+      "description": "机器 10-19 上下文切换激增",
+      "badcase_class": "context_switch_spike",
+      "identified_flaw": "线程数过多，context switch 开销大",
+      "keywords_for_retrieval": [
+        "smd",
+        "context_switch",
+        "thread_bomb"
+      ],
+      "suggestion_or_lesson": "线程数过多，context switch 开销大",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "smd/machine-10-19/anomaly_010"
+    },
+    {
+      "id": "bc-smd-014",
+      "created_at": "2026-09-01T00:47:48.065687Z",
+      "source": "smd",
+      "eval_split": "dev",
+      "alert": {
+        "service": "smd-machine",
+        "metric_name": "cpu temperature",
+        "value": 92,
+        "threshold": 80,
+        "unit": "celsius",
+        "host": "machine-14-27",
+        "duration_s": 1800
+      },
+      "evidence": {
+        "kpi_history": [
+          65,
+          70,
+          75,
+          82,
+          86,
+          89,
+          91,
+          92
+        ],
+        "machine_id": "machine-14-27",
+        "fan_speed_rpm": 4500
+      },
+      "category": "single_metric",
+      "type": "cpu_temperature_high",
+      "expected_root_cause": "cpu_overheating_fan_at_max",
+      "expected_confidence_min": 0.7,
+      "severity": "high",
+      "tags": [
+        "single_metric",
+        "cpu_temperature_high",
+        "smd"
+      ],
+      "description": "机器 14-27 CPU 温度过高",
+      "badcase_class": "cpu_temperature_high",
+      "identified_flaw": "风扇满转但温度仍高，散热问题",
+      "keywords_for_retrieval": [
+        "smd",
+        "temperature",
+        "overheat",
+        "fan"
+      ],
+      "suggestion_or_lesson": "风扇满转但温度仍高，散热问题",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "smd/machine-14-27/anomaly_014"
+    },
+    {
+      "id": "bc-smd-016",
+      "created_at": "2026-09-01T00:47:48.065695Z",
+      "source": "smd",
+      "eval_split": "dev",
+      "alert": {
+        "service": "smd-machine",
+        "metric_name": "disk_io_compound",
+        "value": 1,
+        "threshold": 0,
+        "unit": "boolean",
+        "host": "machine-16-31",
+        "duration_s": 1800
+      },
+      "evidence": {
+        "disk_read_iops": 18000,
+        "disk_write_throughput_mb_s": 600,
+        "io_wait_pct": 35,
+        "load_average": 28
+      },
+      "category": "compound",
+      "type": "disk_io_compound",
+      "expected_root_cause": "compound_disk_io_saturation_cpu_iowait_load",
+      "expected_confidence_min": 0.75,
+      "severity": "high",
+      "tags": [
+        "compound",
+        "disk_io_compound",
+        "smd"
+      ],
+      "description": "磁盘 IO 饱和，iowait + load 高",
+      "badcase_class": "disk_io_compound",
+      "identified_flaw": "磁盘 IO 全面饱和",
+      "keywords_for_retrieval": [
+        "compound",
+        "smd",
+        "disk_io",
+        "iowait",
+        "load"
+      ],
+      "suggestion_or_lesson": "磁盘 IO 全面饱和",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "smd/machine-16-31/compound_002"
+    },
+    {
+      "id": "bc-smd-019",
+      "created_at": "2026-09-01T00:47:48.065709Z",
+      "source": "smd",
+      "eval_split": "dev",
+      "alert": {
+        "service": "smd-machine",
+        "metric_name": "memory usage",
+        "value": 92,
+        "threshold": 85,
+        "unit": "percent",
+        "host": "machine-19-37",
+        "duration_s": 14400
+      },
+      "evidence": {
+        "kpi_history": [
+          40,
+          55,
+          70,
+          80,
+          85,
+          88,
+          90,
+          92
+        ],
+        "previous_fixed_in": "v1.2.0_cache_eviction_policy",
+        "recent_change": "cache_eviction_disabled_by_config"
+      },
+      "category": "regression_guard",
+      "type": "reg_memory_leak_smd",
+      "expected_root_cause": "memory_leak_regression_cache_eviction_disabled",
+      "expected_confidence_min": 0.8,
+      "severity": "high",
+      "tags": [
+        "regression_guard",
+        "reg_memory_leak_smd",
+        "smd"
+      ],
+      "description": "回归：缓存淘汰策略被禁用",
+      "badcase_class": "reg_memory_leak_smd",
+      "identified_flaw": "运维误改配置，缓存不淘汰",
+      "keywords_for_retrieval": [
+        "regression",
+        "smd",
+        "memory_leak",
+        "cache_eviction"
+      ],
+      "suggestion_or_lesson": "运维误改配置，缓存不淘汰",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "smd/machine-19-37/regression_001"
+    },
+    {
+      "id": "bc-smd-007",
+      "created_at": "2026-09-01T00:47:48.065417Z",
+      "source": "smd",
+      "eval_split": "dev",
+      "alert": {
+        "service": "smd-machine",
+        "metric_name": "network in throughput",
+        "value": 1000,
+        "threshold": 200,
+        "unit": "Mbps",
+        "host": "machine-7-13",
+        "duration_s": 120
+      },
+      "evidence": {
+        "kpi_history": [
+          50,
+          100,
+          500,
+          800,
+          950,
+          980,
+          1000,
+          1000
+        ],
+        "machine_id": "machine-7-13",
+        "source_ips_distinct": 45000,
+        "syn_packets_per_sec": 120000
+      },
+      "category": "single_metric",
+      "type": "network_in_ddos",
+      "expected_root_cause": "ddos_attack_syn_flood",
+      "expected_confidence_min": 0.8,
+      "severity": "critical",
+      "tags": [
+        "single_metric",
+        "network_in_ddos",
+        "smd"
+      ],
+      "description": "机器 7-13 入网流量激增（SYN flood 攻击）",
+      "badcase_class": "network_in_ddos",
+      "identified_flaw": "DDoS 攻击：SYN flood",
+      "keywords_for_retrieval": [
+        "smd",
+        "ddos",
+        "syn_flood",
+        "network_in"
+      ],
+      "suggestion_or_lesson": "DDoS 攻击：SYN flood",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "smd/machine-7-13/anomaly_007"
+    },
+    {
+      "id": "bc-smd-013",
+      "created_at": "2026-09-01T00:47:48.065684Z",
+      "source": "smd",
+      "eval_split": "dev",
+      "alert": {
+        "service": "smd-machine",
+        "metric_name": "open file descriptors",
+        "value": 98000,
+        "threshold": 20000,
+        "unit": "fds",
+        "host": "machine-13-25",
+        "duration_s": 3600
+      },
+      "evidence": {
+        "kpi_history": [
+          5000,
+          10000,
+          30000,
+          60000,
+          80000,
+          92000,
+          96000,
+          98000
+        ],
+        "machine_id": "machine-13-25",
+        "fd_leak_pattern": "monotonic"
+      },
+      "category": "single_metric",
+      "type": "file_descriptor_leak",
+      "expected_root_cause": "fd_leak_from_connection_not_closed",
+      "expected_confidence_min": 0.8,
+      "severity": "high",
+      "tags": [
+        "single_metric",
+        "file_descriptor_leak",
+        "smd"
+      ],
+      "description": "机器 13-25 FD 泄漏",
+      "badcase_class": "file_descriptor_leak",
+      "identified_flaw": "连接未关闭，FD 单调增长",
+      "keywords_for_retrieval": [
+        "smd",
+        "fd_leak",
+        "connection"
+      ],
+      "suggestion_or_lesson": "连接未关闭，FD 单调增长",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "smd/machine-13-25/anomaly_013"
+    },
+    {
+      "id": "bc-smd-018",
+      "created_at": "2026-09-01T00:47:48.065703Z",
+      "source": "smd",
+      "eval_split": "dev",
+      "alert": {
+        "service": "smd-machine",
+        "metric_name": "fd_socket_compound",
+        "value": 1,
+        "threshold": 0,
+        "unit": "boolean",
+        "host": "machine-18-35",
+        "duration_s": 1800
+      },
+      "evidence": {
+        "open_fds": 85000,
+        "established_connections": 45000,
+        "time_wait_connections": 25000,
+        "cpu_usage_pct": 60
+      },
+      "category": "compound",
+      "type": "fd_socket_compound",
+      "expected_root_cause": "compound_fd_exhaust_with_tcp_state_leak",
+      "expected_confidence_min": 0.7,
+      "severity": "high",
+      "tags": [
+        "compound",
+        "fd_socket_compound",
+        "smd"
+      ],
+      "description": "FD 耗尽 + TCP 连接泄漏 复合",
+      "badcase_class": "fd_socket_compound",
+      "identified_flaw": "TCP 连接未及时清理，FD 累积",
+      "keywords_for_retrieval": [
+        "compound",
+        "smd",
+        "fd",
+        "tcp",
+        "time_wait"
+      ],
+      "suggestion_or_lesson": "TCP 连接未及时清理，FD 累积",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "smd/machine-18-35/compound_004"
+    },
+    {
+      "id": "bc-smd-011",
+      "created_at": "2026-09-01T00:47:48.065675Z",
+      "source": "smd",
+      "eval_split": "dev",
+      "alert": {
+        "service": "smd-machine",
+        "metric_name": "zombie process count",
+        "value": 150,
+        "threshold": 5,
+        "unit": "processes",
+        "host": "machine-11-21",
+        "duration_s": 7200
+      },
+      "evidence": {
+        "kpi_history": [
+          0,
+          10,
+          30,
+          60,
+          90,
+          120,
+          140,
+          150
+        ],
+        "machine_id": "machine-11-21",
+        "parent_pid_reuse_count": 80
+      },
+      "category": "single_metric",
+      "type": "zombie_process_smd",
+      "expected_root_cause": "zombie_accumulation_from_fork_intensive_app",
+      "expected_confidence_min": 0.7,
+      "severity": "medium",
+      "tags": [
+        "single_metric",
+        "zombie_process_smd",
+        "smd"
+      ],
+      "description": "机器 11-21 僵尸进程累积",
+      "badcase_class": "zombie_process_smd",
+      "identified_flaw": "频繁 fork 但未 wait，僵尸进程累积",
+      "keywords_for_retrieval": [
+        "smd",
+        "zombie",
+        "fork",
+        "wait"
+      ],
+      "suggestion_or_lesson": "频繁 fork 但未 wait，僵尸进程累积",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "smd/machine-11-21/anomaly_011"
+    },
+    {
+      "id": "bc-smd-002",
+      "created_at": "2026-09-01T00:47:48.065377Z",
+      "source": "smd",
+      "eval_split": "dev",
+      "alert": {
+        "service": "smd-machine",
+        "metric_name": "memory usage",
+        "value": 95.0,
+        "threshold": 85.0,
+        "unit": "percent",
+        "host": "machine-2-3",
+        "duration_s": 14400
+      },
+      "evidence": {
+        "kpi_history": [
+          40,
+          50,
+          60,
+          70,
+          80,
+          85,
+          90,
+          95
+        ],
+        "trend": "monotonic_increase",
+        "machine_id": "machine-2-3"
+      },
+      "category": "single_metric",
+      "type": "memory_leak_slow",
+      "expected_root_cause": "memory_leak_slow_growth",
+      "expected_confidence_min": 0.75,
+      "severity": "critical",
+      "tags": [
+        "single_metric",
+        "memory_leak_slow",
+        "smd"
+      ],
+      "description": "机器 2-3 内存 4 小时内从 40% 涨到 95%",
+      "badcase_class": "memory_leak_slow",
+      "identified_flaw": "应用有内存泄漏，慢增长",
+      "keywords_for_retrieval": [
+        "smd",
+        "memory",
+        "leak",
+        "slow"
+      ],
+      "suggestion_or_lesson": "应用有内存泄漏，慢增长",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "smd/machine-2-3/anomaly_002"
+    },
+    {
+      "id": "bc-smd-012",
+      "created_at": "2026-09-01T00:47:48.065680Z",
+      "source": "smd",
+      "eval_split": "dev",
+      "alert": {
+        "service": "smd-machine",
+        "metric_name": "disk write throughput",
+        "value": 850,
+        "threshold": 200,
+        "unit": "MB/s",
+        "host": "machine-12-23",
+        "duration_s": 600
+      },
+      "evidence": {
+        "kpi_history": [
+          50,
+          80,
+          150,
+          300,
+          500,
+          700,
+          800,
+          850
+        ],
+        "machine_id": "machine-12-23",
+        "log_volume_write_per_hour_gb": 25
+      },
+      "category": "single_metric",
+      "type": "disk_write_saturation",
+      "expected_root_cause": "disk_write_saturation_from_log_burst",
+      "expected_confidence_min": 0.75,
+      "severity": "high",
+      "tags": [
+        "single_metric",
+        "disk_write_saturation",
+        "smd"
+      ],
+      "description": "机器 12-23 磁盘写吞吐饱和",
+      "badcase_class": "disk_write_saturation",
+      "identified_flaw": "日志爆发写入，磁盘写饱和",
+      "keywords_for_retrieval": [
+        "smd",
+        "disk_write",
+        "log_burst"
+      ],
+      "suggestion_or_lesson": "日志爆发写入，磁盘写饱和",
+      "audit_trail_excerpt": [],
+      "fixed_in": null,
+      "source_ref": "smd/machine-12-23/anomaly_012"
+    },
+    {
+      "id": "bc-aiopslab-astronomy_shop_ad_service_failure-localization-1",
+      "category": "compound",
+      "type": "astronomy_shop_ad_service_failure",
+      "alert": {
+        "service": "astronomy_shop_ad_service",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "localization",
+        "application": "astronomy_shop_ad_service",
+        "fault_type": "astronomy_shop_ad_service_failure"
+      },
+      "evidence": {
+        "task_type": "localization",
+        "application": "astronomy_shop_ad_service",
+        "fault_type": "astronomy_shop_ad_service_failure",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "astronomy_shop_ad_service_failure-localization-1"
+      },
+      "expected_root_cause": "astronomy_shop_ad_service_failure_in_astronomy_shop_ad_service",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "localization",
+        "medium",
+        "astronomy_shop_ad_service_failure"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem astronomy_shop_ad_service_failure-localization-1: astronomy_shop_ad_service_failure in astronomy_shop_ad_service (localization)",
+      "keywords_for_retrieval": [
+        "localization",
+        "astronomy_shop_ad_service_failure",
+        "astronomy_shop_ad_service",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: localization of astronomy_shop_ad_service_failure in astronomy_shop_ad_service. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-k8s_target_port-misconfig-analysis-3",
+      "category": "regression_guard",
+      "type": "k8s_target_port-misconfig",
+      "alert": {
+        "service": "post-storage-service",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "analysis",
+        "application": "post-storage-service",
+        "fault_type": "k8s_target_port-misconfig"
+      },
+      "evidence": {
+        "task_type": "analysis",
+        "application": "post-storage-service",
+        "fault_type": "k8s_target_port-misconfig",
+        "difficulty": "hard",
+        "aiopslab_problem_id": "k8s_target_port-misconfig-analysis-3"
+      },
+      "expected_root_cause": "k8s_target_port-misconfig_in_post-storage-service",
+      "expected_confidence_min": 0.9,
+      "tags": [
+        "aiopslab",
+        "analysis",
+        "hard",
+        "k8s_target_port-misconfig"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem k8s_target_port-misconfig-analysis-3: k8s_target_port-misconfig in post-storage-service (analysis)",
+      "keywords_for_retrieval": [
+        "analysis",
+        "k8s_target_port-misconfig",
+        "post-storage-service",
+        "hard"
+      ],
+      "severity": "high",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: analysis of k8s_target_port-misconfig in post-storage-service. Difficulty: hard."
+    },
+    {
+      "id": "bc-aiopslab-assign_to_non_existent_node_social_net-analysis-1",
+      "category": "compound",
+      "type": "assign_to_non_existent_node_social_net",
+      "alert": {
+        "service": "social_net",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "analysis",
+        "application": "social_net",
+        "fault_type": "assign_to_non_existent_node_social_net"
+      },
+      "evidence": {
+        "task_type": "analysis",
+        "application": "social_net",
+        "fault_type": "assign_to_non_existent_node_social_net",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "assign_to_non_existent_node_social_net-analysis-1"
+      },
+      "expected_root_cause": "assign_to_non_existent_node_social_net_in_social_net",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "analysis",
+        "medium",
+        "assign_to_non_existent_node_social_net"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem assign_to_non_existent_node_social_net-analysis-1: assign_to_non_existent_node_social_net in social_net (analysis)",
+      "keywords_for_retrieval": [
+        "analysis",
+        "assign_to_non_existent_node_social_net",
+        "social_net",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: analysis of assign_to_non_existent_node_social_net in social_net. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-k8s_target_port-misconfig-localization-1",
+      "category": "compound",
+      "type": "k8s_target_port-misconfig",
+      "alert": {
+        "service": "user-service",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "localization",
+        "application": "user-service",
+        "fault_type": "k8s_target_port-misconfig"
+      },
+      "evidence": {
+        "task_type": "localization",
+        "application": "user-service",
+        "fault_type": "k8s_target_port-misconfig",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "k8s_target_port-misconfig-localization-1"
+      },
+      "expected_root_cause": "k8s_target_port-misconfig_in_user-service",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "localization",
+        "medium",
+        "k8s_target_port-misconfig"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem k8s_target_port-misconfig-localization-1: k8s_target_port-misconfig in user-service (localization)",
+      "keywords_for_retrieval": [
+        "localization",
+        "k8s_target_port-misconfig",
+        "user-service",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: localization of k8s_target_port-misconfig in user-service. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-astronomy_shop_loadgenerator_flood_homepage-localization-1",
+      "category": "compound",
+      "type": "astronomy_shop_loadgenerator_flood_homepage",
+      "alert": {
+        "service": "astronomy_shop_loadgenerator",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "localization",
+        "application": "astronomy_shop_loadgenerator",
+        "fault_type": "astronomy_shop_loadgenerator_flood_homepage"
+      },
+      "evidence": {
+        "task_type": "localization",
+        "application": "astronomy_shop_loadgenerator",
+        "fault_type": "astronomy_shop_loadgenerator_flood_homepage",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "astronomy_shop_loadgenerator_flood_homepage-localization-1"
+      },
+      "expected_root_cause": "astronomy_shop_loadgenerator_flood_homepage_in_astronomy_shop_loadgenerator",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "localization",
+        "medium",
+        "astronomy_shop_loadgenerator_flood_homepage"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem astronomy_shop_loadgenerator_flood_homepage-localization-1: astronomy_shop_loadgenerator_flood_homepage in astronomy_shop_loadgenerator (localization)",
+      "keywords_for_retrieval": [
+        "localization",
+        "astronomy_shop_loadgenerator_flood_homepage",
+        "astronomy_shop_loadgenerator",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: localization of astronomy_shop_loadgenerator_flood_homepage in astronomy_shop_loadgenerator. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-astronomy_shop_image_slow_load-localization-1",
+      "category": "compound",
+      "type": "astronomy_shop_image_slow_load",
+      "alert": {
+        "service": "astronomy_shop_image",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "localization",
+        "application": "astronomy_shop_image",
+        "fault_type": "astronomy_shop_image_slow_load"
+      },
+      "evidence": {
+        "task_type": "localization",
+        "application": "astronomy_shop_image",
+        "fault_type": "astronomy_shop_image_slow_load",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "astronomy_shop_image_slow_load-localization-1"
+      },
+      "expected_root_cause": "astronomy_shop_image_slow_load_in_astronomy_shop_image",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "localization",
+        "medium",
+        "astronomy_shop_image_slow_load"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem astronomy_shop_image_slow_load-localization-1: astronomy_shop_image_slow_load in astronomy_shop_image (localization)",
+      "keywords_for_retrieval": [
+        "localization",
+        "astronomy_shop_image_slow_load",
+        "astronomy_shop_image",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: localization of astronomy_shop_image_slow_load in astronomy_shop_image. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-auth_miss_mongodb-mitigation-1",
+      "category": "regression_guard",
+      "type": "auth_miss_mongodb",
+      "alert": {
+        "service": "mongodb",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "mitigation",
+        "application": "mongodb",
+        "fault_type": "auth_miss_mongodb"
+      },
+      "evidence": {
+        "task_type": "mitigation",
+        "application": "mongodb",
+        "fault_type": "auth_miss_mongodb",
+        "difficulty": "hard",
+        "aiopslab_problem_id": "auth_miss_mongodb-mitigation-1"
+      },
+      "expected_root_cause": "auth_miss_mongodb_in_mongodb",
+      "expected_confidence_min": 0.9,
+      "tags": [
+        "aiopslab",
+        "mitigation",
+        "hard",
+        "auth_miss_mongodb"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem auth_miss_mongodb-mitigation-1: auth_miss_mongodb in mongodb (mitigation)",
+      "keywords_for_retrieval": [
+        "mitigation",
+        "auth_miss_mongodb",
+        "mongodb",
+        "hard"
+      ],
+      "severity": "high",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: mitigation of auth_miss_mongodb in mongodb. Difficulty: hard."
+    },
+    {
+      "id": "bc-aiopslab-user_unregistered_mongodb-analysis-1",
+      "category": "compound",
+      "type": "user_unregistered_mongodb",
+      "alert": {
+        "service": "mongodb-geo",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "analysis",
+        "application": "mongodb-geo",
+        "fault_type": "user_unregistered_mongodb"
+      },
+      "evidence": {
+        "task_type": "analysis",
+        "application": "mongodb-geo",
+        "fault_type": "user_unregistered_mongodb",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "user_unregistered_mongodb-analysis-1"
+      },
+      "expected_root_cause": "user_unregistered_mongodb_in_mongodb-geo",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "analysis",
+        "medium",
+        "user_unregistered_mongodb"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem user_unregistered_mongodb-analysis-1: user_unregistered_mongodb in mongodb-geo (analysis)",
+      "keywords_for_retrieval": [
+        "analysis",
+        "user_unregistered_mongodb",
+        "mongodb-geo",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: analysis of user_unregistered_mongodb in mongodb-geo. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-assign_to_non_existent_node_social_net-detection-1",
+      "category": "single_metric",
+      "type": "assign_to_non_existent_node_social_net",
+      "alert": {
+        "service": "social_net",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "social_net",
+        "fault_type": "assign_to_non_existent_node_social_net"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "social_net",
+        "fault_type": "assign_to_non_existent_node_social_net",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "assign_to_non_existent_node_social_net-detection-1"
+      },
+      "expected_root_cause": "assign_to_non_existent_node_social_net_in_social_net",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "assign_to_non_existent_node_social_net"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem assign_to_non_existent_node_social_net-detection-1: assign_to_non_existent_node_social_net in social_net (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "assign_to_non_existent_node_social_net",
+        "social_net",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of assign_to_non_existent_node_social_net in social_net. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-misconfig_app_hotel_res-detection-1",
+      "category": "single_metric",
+      "type": "misconfig_app_hotel_res",
+      "alert": {
+        "service": "hotel_res",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "hotel_res",
+        "fault_type": "misconfig_app_hotel_res"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "hotel_res",
+        "fault_type": "misconfig_app_hotel_res",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "misconfig_app_hotel_res-detection-1"
+      },
+      "expected_root_cause": "misconfig_app_hotel_res_in_hotel_res",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "misconfig_app_hotel_res"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem misconfig_app_hotel_res-detection-1: misconfig_app_hotel_res in hotel_res (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "misconfig_app_hotel_res",
+        "hotel_res",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of misconfig_app_hotel_res in hotel_res. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-container_kill-localization",
+      "category": "compound",
+      "type": "container_kill",
+      "alert": {
+        "service": "default",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "localization",
+        "application": "default",
+        "fault_type": "container_kill"
+      },
+      "evidence": {
+        "task_type": "localization",
+        "application": "default",
+        "fault_type": "container_kill",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "container_kill-localization"
+      },
+      "expected_root_cause": "container_kill_in_default",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "localization",
+        "medium",
+        "container_kill"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem container_kill-localization: container_kill in default (localization)",
+      "keywords_for_retrieval": [
+        "localization",
+        "container_kill",
+        "default",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: localization of container_kill in default. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-pod_failure_hotel_res-localization-1",
+      "category": "compound",
+      "type": "pod_failure_hotel_res",
+      "alert": {
+        "service": "hotel_res",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "localization",
+        "application": "hotel_res",
+        "fault_type": "pod_failure_hotel_res"
+      },
+      "evidence": {
+        "task_type": "localization",
+        "application": "hotel_res",
+        "fault_type": "pod_failure_hotel_res",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "pod_failure_hotel_res-localization-1"
+      },
+      "expected_root_cause": "pod_failure_hotel_res_in_hotel_res",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "localization",
+        "medium",
+        "pod_failure_hotel_res"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem pod_failure_hotel_res-localization-1: pod_failure_hotel_res in hotel_res (localization)",
+      "keywords_for_retrieval": [
+        "localization",
+        "pod_failure_hotel_res",
+        "hotel_res",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: localization of pod_failure_hotel_res in hotel_res. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-astronomy_shop_kafka_queue_problems-detection-1",
+      "category": "single_metric",
+      "type": "astronomy_shop_kafka_queue_problems",
+      "alert": {
+        "service": "astronomy_shop_kafka",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "astronomy_shop_kafka",
+        "fault_type": "astronomy_shop_kafka_queue_problems"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "astronomy_shop_kafka",
+        "fault_type": "astronomy_shop_kafka_queue_problems",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "astronomy_shop_kafka_queue_problems-detection-1"
+      },
+      "expected_root_cause": "astronomy_shop_kafka_queue_problems_in_astronomy_shop_kafka",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "astronomy_shop_kafka_queue_problems"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem astronomy_shop_kafka_queue_problems-detection-1: astronomy_shop_kafka_queue_problems in astronomy_shop_kafka (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "astronomy_shop_kafka_queue_problems",
+        "astronomy_shop_kafka",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of astronomy_shop_kafka_queue_problems in astronomy_shop_kafka. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-revoke_auth_mongodb-mitigation-1",
+      "category": "regression_guard",
+      "type": "revoke_auth_mongodb",
+      "alert": {
+        "service": "mongodb-geo",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "mitigation",
+        "application": "mongodb-geo",
+        "fault_type": "revoke_auth_mongodb"
+      },
+      "evidence": {
+        "task_type": "mitigation",
+        "application": "mongodb-geo",
+        "fault_type": "revoke_auth_mongodb",
+        "difficulty": "hard",
+        "aiopslab_problem_id": "revoke_auth_mongodb-mitigation-1"
+      },
+      "expected_root_cause": "revoke_auth_mongodb_in_mongodb-geo",
+      "expected_confidence_min": 0.9,
+      "tags": [
+        "aiopslab",
+        "mitigation",
+        "hard",
+        "revoke_auth_mongodb"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem revoke_auth_mongodb-mitigation-1: revoke_auth_mongodb in mongodb-geo (mitigation)",
+      "keywords_for_retrieval": [
+        "mitigation",
+        "revoke_auth_mongodb",
+        "mongodb-geo",
+        "hard"
+      ],
+      "severity": "high",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: mitigation of revoke_auth_mongodb in mongodb-geo. Difficulty: hard."
+    },
+    {
+      "id": "bc-aiopslab-astronomy_shop_ad_service_high_cpu-detection-1",
+      "category": "single_metric",
+      "type": "astronomy_shop_ad_service_high_cpu",
+      "alert": {
+        "service": "astronomy_shop_ad_service",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "astronomy_shop_ad_service",
+        "fault_type": "astronomy_shop_ad_service_high_cpu"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "astronomy_shop_ad_service",
+        "fault_type": "astronomy_shop_ad_service_high_cpu",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "astronomy_shop_ad_service_high_cpu-detection-1"
+      },
+      "expected_root_cause": "astronomy_shop_ad_service_high_cpu_in_astronomy_shop_ad_service",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "astronomy_shop_ad_service_high_cpu"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem astronomy_shop_ad_service_high_cpu-detection-1: astronomy_shop_ad_service_high_cpu in astronomy_shop_ad_service (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "astronomy_shop_ad_service_high_cpu",
+        "astronomy_shop_ad_service",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of astronomy_shop_ad_service_high_cpu in astronomy_shop_ad_service. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-noop_detection_social_network-1",
+      "category": "single_metric",
+      "type": "noop_detection",
+      "alert": {
+        "service": "social_network",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "social_network",
+        "fault_type": "noop_detection"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "social_network",
+        "fault_type": "noop_detection",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "noop_detection_social_network-1"
+      },
+      "expected_root_cause": "noop_detection_in_social_network",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "noop_detection"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem noop_detection_social_network-1: noop_detection in social_network (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "noop_detection",
+        "social_network",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of noop_detection in social_network. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-astronomy_shop_ad_service_manual_gc-localization-1",
+      "category": "compound",
+      "type": "astronomy_shop_ad_service_manual_gc",
+      "alert": {
+        "service": "astronomy_shop_ad_service",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "localization",
+        "application": "astronomy_shop_ad_service",
+        "fault_type": "astronomy_shop_ad_service_manual_gc"
+      },
+      "evidence": {
+        "task_type": "localization",
+        "application": "astronomy_shop_ad_service",
+        "fault_type": "astronomy_shop_ad_service_manual_gc",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "astronomy_shop_ad_service_manual_gc-localization-1"
+      },
+      "expected_root_cause": "astronomy_shop_ad_service_manual_gc_in_astronomy_shop_ad_service",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "localization",
+        "medium",
+        "astronomy_shop_ad_service_manual_gc"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem astronomy_shop_ad_service_manual_gc-localization-1: astronomy_shop_ad_service_manual_gc in astronomy_shop_ad_service (localization)",
+      "keywords_for_retrieval": [
+        "localization",
+        "astronomy_shop_ad_service_manual_gc",
+        "astronomy_shop_ad_service",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: localization of astronomy_shop_ad_service_manual_gc in astronomy_shop_ad_service. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-redeploy_without_PV-detection-1",
+      "category": "single_metric",
+      "type": "redeploy_without_PV",
+      "alert": {
+        "service": "default",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "default",
+        "fault_type": "redeploy_without_PV"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "default",
+        "fault_type": "redeploy_without_PV",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "redeploy_without_PV-detection-1"
+      },
+      "expected_root_cause": "redeploy_without_PV_in_default",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "redeploy_without_PV"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem redeploy_without_PV-detection-1: redeploy_without_PV in default (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "redeploy_without_PV",
+        "default",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of redeploy_without_PV in default. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-network_loss_hotel_res-localization-1",
+      "category": "compound",
+      "type": "network_loss_hotel_res",
+      "alert": {
+        "service": "hotel_res",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "localization",
+        "application": "hotel_res",
+        "fault_type": "network_loss_hotel_res"
+      },
+      "evidence": {
+        "task_type": "localization",
+        "application": "hotel_res",
+        "fault_type": "network_loss_hotel_res",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "network_loss_hotel_res-localization-1"
+      },
+      "expected_root_cause": "network_loss_hotel_res_in_hotel_res",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "localization",
+        "medium",
+        "network_loss_hotel_res"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem network_loss_hotel_res-localization-1: network_loss_hotel_res in hotel_res (localization)",
+      "keywords_for_retrieval": [
+        "localization",
+        "network_loss_hotel_res",
+        "hotel_res",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: localization of network_loss_hotel_res in hotel_res. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-noop_detection_astronomy_shop-1",
+      "category": "single_metric",
+      "type": "noop_detection",
+      "alert": {
+        "service": "astronomy_shop",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "astronomy_shop",
+        "fault_type": "noop_detection"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "astronomy_shop",
+        "fault_type": "noop_detection",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "noop_detection_astronomy_shop-1"
+      },
+      "expected_root_cause": "noop_detection_in_astronomy_shop",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "noop_detection"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem noop_detection_astronomy_shop-1: noop_detection in astronomy_shop (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "noop_detection",
+        "astronomy_shop",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of noop_detection in astronomy_shop. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-pod_kill_hotel_res-localization-1",
+      "category": "compound",
+      "type": "pod_kill_hotel_res",
+      "alert": {
+        "service": "hotel_res",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "localization",
+        "application": "hotel_res",
+        "fault_type": "pod_kill_hotel_res"
+      },
+      "evidence": {
+        "task_type": "localization",
+        "application": "hotel_res",
+        "fault_type": "pod_kill_hotel_res",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "pod_kill_hotel_res-localization-1"
+      },
+      "expected_root_cause": "pod_kill_hotel_res_in_hotel_res",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "localization",
+        "medium",
+        "pod_kill_hotel_res"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem pod_kill_hotel_res-localization-1: pod_kill_hotel_res in hotel_res (localization)",
+      "keywords_for_retrieval": [
+        "localization",
+        "pod_kill_hotel_res",
+        "hotel_res",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: localization of pod_kill_hotel_res in hotel_res. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-wrong_bin_usage-localization-1",
+      "category": "compound",
+      "type": "wrong_bin_usage",
+      "alert": {
+        "service": "default",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "localization",
+        "application": "default",
+        "fault_type": "wrong_bin_usage"
+      },
+      "evidence": {
+        "task_type": "localization",
+        "application": "default",
+        "fault_type": "wrong_bin_usage",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "wrong_bin_usage-localization-1"
+      },
+      "expected_root_cause": "wrong_bin_usage_in_default",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "localization",
+        "medium",
+        "wrong_bin_usage"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem wrong_bin_usage-localization-1: wrong_bin_usage in default (localization)",
+      "keywords_for_retrieval": [
+        "localization",
+        "wrong_bin_usage",
+        "default",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: localization of wrong_bin_usage in default. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-astronomy_shop_payment_service_unreachable-detection-1",
+      "category": "single_metric",
+      "type": "astronomy_shop_payment_service_unreachable",
+      "alert": {
+        "service": "astronomy_shop_payment_service",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "astronomy_shop_payment_service",
+        "fault_type": "astronomy_shop_payment_service_unreachable"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "astronomy_shop_payment_service",
+        "fault_type": "astronomy_shop_payment_service_unreachable",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "astronomy_shop_payment_service_unreachable-detection-1"
+      },
+      "expected_root_cause": "astronomy_shop_payment_service_unreachable_in_astronomy_shop_payment_service",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "astronomy_shop_payment_service_unreachable"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem astronomy_shop_payment_service_unreachable-detection-1: astronomy_shop_payment_service_unreachable in astronomy_shop_payment_service (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "astronomy_shop_payment_service_unreachable",
+        "astronomy_shop_payment_service",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of astronomy_shop_payment_service_unreachable in astronomy_shop_payment_service. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-astronomy_shop_cart_service_failure-detection-1",
+      "category": "single_metric",
+      "type": "astronomy_shop_cart_service_failure",
+      "alert": {
+        "service": "astronomy_shop_cart_service",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "astronomy_shop_cart_service",
+        "fault_type": "astronomy_shop_cart_service_failure"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "astronomy_shop_cart_service",
+        "fault_type": "astronomy_shop_cart_service_failure",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "astronomy_shop_cart_service_failure-detection-1"
+      },
+      "expected_root_cause": "astronomy_shop_cart_service_failure_in_astronomy_shop_cart_service",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "astronomy_shop_cart_service_failure"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem astronomy_shop_cart_service_failure-detection-1: astronomy_shop_cart_service_failure in astronomy_shop_cart_service (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "astronomy_shop_cart_service_failure",
+        "astronomy_shop_cart_service",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of astronomy_shop_cart_service_failure in astronomy_shop_cart_service. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-misconfig_app_hotel_res-localization-1",
+      "category": "compound",
+      "type": "misconfig_app_hotel_res",
+      "alert": {
+        "service": "hotel_res",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "localization",
+        "application": "hotel_res",
+        "fault_type": "misconfig_app_hotel_res"
+      },
+      "evidence": {
+        "task_type": "localization",
+        "application": "hotel_res",
+        "fault_type": "misconfig_app_hotel_res",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "misconfig_app_hotel_res-localization-1"
+      },
+      "expected_root_cause": "misconfig_app_hotel_res_in_hotel_res",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "localization",
+        "medium",
+        "misconfig_app_hotel_res"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem misconfig_app_hotel_res-localization-1: misconfig_app_hotel_res in hotel_res (localization)",
+      "keywords_for_retrieval": [
+        "localization",
+        "misconfig_app_hotel_res",
+        "hotel_res",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: localization of misconfig_app_hotel_res in hotel_res. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-k8s_target_port-misconfig-detection-3",
+      "category": "single_metric",
+      "type": "k8s_target_port-misconfig",
+      "alert": {
+        "service": "post-storage-service",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "post-storage-service",
+        "fault_type": "k8s_target_port-misconfig"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "post-storage-service",
+        "fault_type": "k8s_target_port-misconfig",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "k8s_target_port-misconfig-detection-3"
+      },
+      "expected_root_cause": "k8s_target_port-misconfig_in_post-storage-service",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "k8s_target_port-misconfig"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem k8s_target_port-misconfig-detection-3: k8s_target_port-misconfig in post-storage-service (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "k8s_target_port-misconfig",
+        "post-storage-service",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of k8s_target_port-misconfig in post-storage-service. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-scale_pod_zero_social_net-localization-1",
+      "category": "compound",
+      "type": "scale_pod_zero_social_net",
+      "alert": {
+        "service": "social_net",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "localization",
+        "application": "social_net",
+        "fault_type": "scale_pod_zero_social_net"
+      },
+      "evidence": {
+        "task_type": "localization",
+        "application": "social_net",
+        "fault_type": "scale_pod_zero_social_net",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "scale_pod_zero_social_net-localization-1"
+      },
+      "expected_root_cause": "scale_pod_zero_social_net_in_social_net",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "localization",
+        "medium",
+        "scale_pod_zero_social_net"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem scale_pod_zero_social_net-localization-1: scale_pod_zero_social_net in social_net (localization)",
+      "keywords_for_retrieval": [
+        "localization",
+        "scale_pod_zero_social_net",
+        "social_net",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: localization of scale_pod_zero_social_net in social_net. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-astronomy_shop_loadgenerator_flood_homepage-detection-1",
+      "category": "single_metric",
+      "type": "astronomy_shop_loadgenerator_flood_homepage",
+      "alert": {
+        "service": "astronomy_shop_loadgenerator",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "astronomy_shop_loadgenerator",
+        "fault_type": "astronomy_shop_loadgenerator_flood_homepage"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "astronomy_shop_loadgenerator",
+        "fault_type": "astronomy_shop_loadgenerator_flood_homepage",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "astronomy_shop_loadgenerator_flood_homepage-detection-1"
+      },
+      "expected_root_cause": "astronomy_shop_loadgenerator_flood_homepage_in_astronomy_shop_loadgenerator",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "astronomy_shop_loadgenerator_flood_homepage"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem astronomy_shop_loadgenerator_flood_homepage-detection-1: astronomy_shop_loadgenerator_flood_homepage in astronomy_shop_loadgenerator (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "astronomy_shop_loadgenerator_flood_homepage",
+        "astronomy_shop_loadgenerator",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of astronomy_shop_loadgenerator_flood_homepage in astronomy_shop_loadgenerator. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-user_unregistered_mongodb-analysis-2",
+      "category": "compound",
+      "type": "user_unregistered_mongodb",
+      "alert": {
+        "service": "mongodb-rate",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "analysis",
+        "application": "mongodb-rate",
+        "fault_type": "user_unregistered_mongodb"
+      },
+      "evidence": {
+        "task_type": "analysis",
+        "application": "mongodb-rate",
+        "fault_type": "user_unregistered_mongodb",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "user_unregistered_mongodb-analysis-2"
+      },
+      "expected_root_cause": "user_unregistered_mongodb_in_mongodb-rate",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "analysis",
+        "medium",
+        "user_unregistered_mongodb"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem user_unregistered_mongodb-analysis-2: user_unregistered_mongodb in mongodb-rate (analysis)",
+      "keywords_for_retrieval": [
+        "analysis",
+        "user_unregistered_mongodb",
+        "mongodb-rate",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: analysis of user_unregistered_mongodb in mongodb-rate. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-assign_to_non_existent_node_social_net-mitigation-1",
+      "category": "regression_guard",
+      "type": "assign_to_non_existent_node_social_net",
+      "alert": {
+        "service": "social_net",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "mitigation",
+        "application": "social_net",
+        "fault_type": "assign_to_non_existent_node_social_net"
+      },
+      "evidence": {
+        "task_type": "mitigation",
+        "application": "social_net",
+        "fault_type": "assign_to_non_existent_node_social_net",
+        "difficulty": "hard",
+        "aiopslab_problem_id": "assign_to_non_existent_node_social_net-mitigation-1"
+      },
+      "expected_root_cause": "assign_to_non_existent_node_social_net_in_social_net",
+      "expected_confidence_min": 0.9,
+      "tags": [
+        "aiopslab",
+        "mitigation",
+        "hard",
+        "assign_to_non_existent_node_social_net"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem assign_to_non_existent_node_social_net-mitigation-1: assign_to_non_existent_node_social_net in social_net (mitigation)",
+      "keywords_for_retrieval": [
+        "mitigation",
+        "assign_to_non_existent_node_social_net",
+        "social_net",
+        "hard"
+      ],
+      "severity": "high",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: mitigation of assign_to_non_existent_node_social_net in social_net. Difficulty: hard."
+    },
+    {
+      "id": "bc-aiopslab-astronomy_shop_ad_service_manual_gc-detection-1",
+      "category": "single_metric",
+      "type": "astronomy_shop_ad_service_manual_gc",
+      "alert": {
+        "service": "astronomy_shop_ad_service",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "astronomy_shop_ad_service",
+        "fault_type": "astronomy_shop_ad_service_manual_gc"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "astronomy_shop_ad_service",
+        "fault_type": "astronomy_shop_ad_service_manual_gc",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "astronomy_shop_ad_service_manual_gc-detection-1"
+      },
+      "expected_root_cause": "astronomy_shop_ad_service_manual_gc_in_astronomy_shop_ad_service",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "astronomy_shop_ad_service_manual_gc"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem astronomy_shop_ad_service_manual_gc-detection-1: astronomy_shop_ad_service_manual_gc in astronomy_shop_ad_service (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "astronomy_shop_ad_service_manual_gc",
+        "astronomy_shop_ad_service",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of astronomy_shop_ad_service_manual_gc in astronomy_shop_ad_service. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-assign_to_non_existent_node_social_net-localization-1",
+      "category": "compound",
+      "type": "assign_to_non_existent_node_social_net",
+      "alert": {
+        "service": "social_net",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "localization",
+        "application": "social_net",
+        "fault_type": "assign_to_non_existent_node_social_net"
+      },
+      "evidence": {
+        "task_type": "localization",
+        "application": "social_net",
+        "fault_type": "assign_to_non_existent_node_social_net",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "assign_to_non_existent_node_social_net-localization-1"
+      },
+      "expected_root_cause": "assign_to_non_existent_node_social_net_in_social_net",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "localization",
+        "medium",
+        "assign_to_non_existent_node_social_net"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem assign_to_non_existent_node_social_net-localization-1: assign_to_non_existent_node_social_net in social_net (localization)",
+      "keywords_for_retrieval": [
+        "localization",
+        "assign_to_non_existent_node_social_net",
+        "social_net",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: localization of assign_to_non_existent_node_social_net in social_net. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-scale_pod_zero_social_net-mitigation-1",
+      "category": "regression_guard",
+      "type": "scale_pod_zero_social_net",
+      "alert": {
+        "service": "social_net",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "mitigation",
+        "application": "social_net",
+        "fault_type": "scale_pod_zero_social_net"
+      },
+      "evidence": {
+        "task_type": "mitigation",
+        "application": "social_net",
+        "fault_type": "scale_pod_zero_social_net",
+        "difficulty": "hard",
+        "aiopslab_problem_id": "scale_pod_zero_social_net-mitigation-1"
+      },
+      "expected_root_cause": "scale_pod_zero_social_net_in_social_net",
+      "expected_confidence_min": 0.9,
+      "tags": [
+        "aiopslab",
+        "mitigation",
+        "hard",
+        "scale_pod_zero_social_net"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem scale_pod_zero_social_net-mitigation-1: scale_pod_zero_social_net in social_net (mitigation)",
+      "keywords_for_retrieval": [
+        "mitigation",
+        "scale_pod_zero_social_net",
+        "social_net",
+        "hard"
+      ],
+      "severity": "high",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: mitigation of scale_pod_zero_social_net in social_net. Difficulty: hard."
+    },
+    {
+      "id": "bc-aiopslab-flower_node_stop-detection",
+      "category": "single_metric",
+      "type": "flower_node_stop",
+      "alert": {
+        "service": "flower",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "flower",
+        "fault_type": "flower_node_stop"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "flower",
+        "fault_type": "flower_node_stop",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "flower_node_stop-detection"
+      },
+      "expected_root_cause": "flower_node_stop_in_flower",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "flower_node_stop"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem flower_node_stop-detection: flower_node_stop in flower (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "flower_node_stop",
+        "flower",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of flower_node_stop in flower. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-pod_failure_hotel_res-detection-1",
+      "category": "single_metric",
+      "type": "pod_failure_hotel_res",
+      "alert": {
+        "service": "hotel_res",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "hotel_res",
+        "fault_type": "pod_failure_hotel_res"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "hotel_res",
+        "fault_type": "pod_failure_hotel_res",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "pod_failure_hotel_res-detection-1"
+      },
+      "expected_root_cause": "pod_failure_hotel_res_in_hotel_res",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "pod_failure_hotel_res"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem pod_failure_hotel_res-detection-1: pod_failure_hotel_res in hotel_res (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "pod_failure_hotel_res",
+        "hotel_res",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of pod_failure_hotel_res in hotel_res. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-astronomy_shop_product_catalog_service_failure-detection-1",
+      "category": "single_metric",
+      "type": "astronomy_shop_product_catalog_service_failure",
+      "alert": {
+        "service": "astronomy_shop_product_catalog",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "astronomy_shop_product_catalog",
+        "fault_type": "astronomy_shop_product_catalog_service_failure"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "astronomy_shop_product_catalog",
+        "fault_type": "astronomy_shop_product_catalog_service_failure",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "astronomy_shop_product_catalog_service_failure-detection-1"
+      },
+      "expected_root_cause": "astronomy_shop_product_catalog_service_failure_in_astronomy_shop_product_catalog",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "astronomy_shop_product_catalog_service_failure"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem astronomy_shop_product_catalog_service_failure-detection-1: astronomy_shop_product_catalog_service_failure in astronomy_shop_product_catalog (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "astronomy_shop_product_catalog_service_failure",
+        "astronomy_shop_product_catalog",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of astronomy_shop_product_catalog_service_failure in astronomy_shop_product_catalog. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-auth_miss_mongodb-detection-1",
+      "category": "single_metric",
+      "type": "auth_miss_mongodb",
+      "alert": {
+        "service": "mongodb",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "mongodb",
+        "fault_type": "auth_miss_mongodb"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "mongodb",
+        "fault_type": "auth_miss_mongodb",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "auth_miss_mongodb-detection-1"
+      },
+      "expected_root_cause": "auth_miss_mongodb_in_mongodb",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "auth_miss_mongodb"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem auth_miss_mongodb-detection-1: auth_miss_mongodb in mongodb (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "auth_miss_mongodb",
+        "mongodb",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of auth_miss_mongodb in mongodb. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-scale_pod_zero_social_net-detection-1",
+      "category": "single_metric",
+      "type": "scale_pod_zero_social_net",
+      "alert": {
+        "service": "social_net",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "social_net",
+        "fault_type": "scale_pod_zero_social_net"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "social_net",
+        "fault_type": "scale_pod_zero_social_net",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "scale_pod_zero_social_net-detection-1"
+      },
+      "expected_root_cause": "scale_pod_zero_social_net_in_social_net",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "scale_pod_zero_social_net"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem scale_pod_zero_social_net-detection-1: scale_pod_zero_social_net in social_net (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "scale_pod_zero_social_net",
+        "social_net",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of scale_pod_zero_social_net in social_net. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-revoke_auth_mongodb-mitigation-2",
+      "category": "regression_guard",
+      "type": "revoke_auth_mongodb",
+      "alert": {
+        "service": "mongodb-rate",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "mitigation",
+        "application": "mongodb-rate",
+        "fault_type": "revoke_auth_mongodb"
+      },
+      "evidence": {
+        "task_type": "mitigation",
+        "application": "mongodb-rate",
+        "fault_type": "revoke_auth_mongodb",
+        "difficulty": "hard",
+        "aiopslab_problem_id": "revoke_auth_mongodb-mitigation-2"
+      },
+      "expected_root_cause": "revoke_auth_mongodb_in_mongodb-rate",
+      "expected_confidence_min": 0.9,
+      "tags": [
+        "aiopslab",
+        "mitigation",
+        "hard",
+        "revoke_auth_mongodb"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem revoke_auth_mongodb-mitigation-2: revoke_auth_mongodb in mongodb-rate (mitigation)",
+      "keywords_for_retrieval": [
+        "mitigation",
+        "revoke_auth_mongodb",
+        "mongodb-rate",
+        "hard"
+      ],
+      "severity": "high",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: mitigation of revoke_auth_mongodb in mongodb-rate. Difficulty: hard."
+    },
+    {
+      "id": "bc-aiopslab-revoke_auth_mongodb-analysis-1",
+      "category": "compound",
+      "type": "revoke_auth_mongodb",
+      "alert": {
+        "service": "mongodb-geo",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "analysis",
+        "application": "mongodb-geo",
+        "fault_type": "revoke_auth_mongodb"
+      },
+      "evidence": {
+        "task_type": "analysis",
+        "application": "mongodb-geo",
+        "fault_type": "revoke_auth_mongodb",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "revoke_auth_mongodb-analysis-1"
+      },
+      "expected_root_cause": "revoke_auth_mongodb_in_mongodb-geo",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "analysis",
+        "medium",
+        "revoke_auth_mongodb"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem revoke_auth_mongodb-analysis-1: revoke_auth_mongodb in mongodb-geo (analysis)",
+      "keywords_for_retrieval": [
+        "analysis",
+        "revoke_auth_mongodb",
+        "mongodb-geo",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: analysis of revoke_auth_mongodb in mongodb-geo. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-astronomy_shop_image_slow_load-detection-1",
+      "category": "single_metric",
+      "type": "astronomy_shop_image_slow_load",
+      "alert": {
+        "service": "astronomy_shop_image",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "astronomy_shop_image",
+        "fault_type": "astronomy_shop_image_slow_load"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "astronomy_shop_image",
+        "fault_type": "astronomy_shop_image_slow_load",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "astronomy_shop_image_slow_load-detection-1"
+      },
+      "expected_root_cause": "astronomy_shop_image_slow_load_in_astronomy_shop_image",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "astronomy_shop_image_slow_load"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem astronomy_shop_image_slow_load-detection-1: astronomy_shop_image_slow_load in astronomy_shop_image (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "astronomy_shop_image_slow_load",
+        "astronomy_shop_image",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of astronomy_shop_image_slow_load in astronomy_shop_image. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-astronomy_shop_kafka_queue_problems-localization-1",
+      "category": "compound",
+      "type": "astronomy_shop_kafka_queue_problems",
+      "alert": {
+        "service": "astronomy_shop_kafka",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "localization",
+        "application": "astronomy_shop_kafka",
+        "fault_type": "astronomy_shop_kafka_queue_problems"
+      },
+      "evidence": {
+        "task_type": "localization",
+        "application": "astronomy_shop_kafka",
+        "fault_type": "astronomy_shop_kafka_queue_problems",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "astronomy_shop_kafka_queue_problems-localization-1"
+      },
+      "expected_root_cause": "astronomy_shop_kafka_queue_problems_in_astronomy_shop_kafka",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "localization",
+        "medium",
+        "astronomy_shop_kafka_queue_problems"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem astronomy_shop_kafka_queue_problems-localization-1: astronomy_shop_kafka_queue_problems in astronomy_shop_kafka (localization)",
+      "keywords_for_retrieval": [
+        "localization",
+        "astronomy_shop_kafka_queue_problems",
+        "astronomy_shop_kafka",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: localization of astronomy_shop_kafka_queue_problems in astronomy_shop_kafka. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-network_delay_hotel_res-detection-1",
+      "category": "single_metric",
+      "type": "network_delay_hotel_res",
+      "alert": {
+        "service": "hotel_res",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "hotel_res",
+        "fault_type": "network_delay_hotel_res"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "hotel_res",
+        "fault_type": "network_delay_hotel_res",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "network_delay_hotel_res-detection-1"
+      },
+      "expected_root_cause": "network_delay_hotel_res_in_hotel_res",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "network_delay_hotel_res"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem network_delay_hotel_res-detection-1: network_delay_hotel_res in hotel_res (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "network_delay_hotel_res",
+        "hotel_res",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of network_delay_hotel_res in hotel_res. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-k8s_target_port-misconfig-mitigation-2",
+      "category": "regression_guard",
+      "type": "k8s_target_port-misconfig",
+      "alert": {
+        "service": "text-service",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "mitigation",
+        "application": "text-service",
+        "fault_type": "k8s_target_port-misconfig"
+      },
+      "evidence": {
+        "task_type": "mitigation",
+        "application": "text-service",
+        "fault_type": "k8s_target_port-misconfig",
+        "difficulty": "hard",
+        "aiopslab_problem_id": "k8s_target_port-misconfig-mitigation-2"
+      },
+      "expected_root_cause": "k8s_target_port-misconfig_in_text-service",
+      "expected_confidence_min": 0.9,
+      "tags": [
+        "aiopslab",
+        "mitigation",
+        "hard",
+        "k8s_target_port-misconfig"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem k8s_target_port-misconfig-mitigation-2: k8s_target_port-misconfig in text-service (mitigation)",
+      "keywords_for_retrieval": [
+        "mitigation",
+        "k8s_target_port-misconfig",
+        "text-service",
+        "hard"
+      ],
+      "severity": "high",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: mitigation of k8s_target_port-misconfig in text-service. Difficulty: hard."
+    },
+    {
+      "id": "bc-aiopslab-misconfig_app_hotel_res-analysis-1",
+      "category": "compound",
+      "type": "misconfig_app_hotel_res",
+      "alert": {
+        "service": "hotel_res",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "analysis",
+        "application": "hotel_res",
+        "fault_type": "misconfig_app_hotel_res"
+      },
+      "evidence": {
+        "task_type": "analysis",
+        "application": "hotel_res",
+        "fault_type": "misconfig_app_hotel_res",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "misconfig_app_hotel_res-analysis-1"
+      },
+      "expected_root_cause": "misconfig_app_hotel_res_in_hotel_res",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "analysis",
+        "medium",
+        "misconfig_app_hotel_res"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem misconfig_app_hotel_res-analysis-1: misconfig_app_hotel_res in hotel_res (analysis)",
+      "keywords_for_retrieval": [
+        "analysis",
+        "misconfig_app_hotel_res",
+        "hotel_res",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: analysis of misconfig_app_hotel_res in hotel_res. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-astronomy_shop_payment_service_failure-detection-1",
+      "category": "single_metric",
+      "type": "astronomy_shop_payment_service_failure",
+      "alert": {
+        "service": "astronomy_shop_payment_service",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "astronomy_shop_payment_service",
+        "fault_type": "astronomy_shop_payment_service_failure"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "astronomy_shop_payment_service",
+        "fault_type": "astronomy_shop_payment_service_failure",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "astronomy_shop_payment_service_failure-detection-1"
+      },
+      "expected_root_cause": "astronomy_shop_payment_service_failure_in_astronomy_shop_payment_service",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "astronomy_shop_payment_service_failure"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem astronomy_shop_payment_service_failure-detection-1: astronomy_shop_payment_service_failure in astronomy_shop_payment_service (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "astronomy_shop_payment_service_failure",
+        "astronomy_shop_payment_service",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of astronomy_shop_payment_service_failure in astronomy_shop_payment_service. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-k8s_target_port-misconfig-analysis-1",
+      "category": "regression_guard",
+      "type": "k8s_target_port-misconfig",
+      "alert": {
+        "service": "user-service",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "analysis",
+        "application": "user-service",
+        "fault_type": "k8s_target_port-misconfig"
+      },
+      "evidence": {
+        "task_type": "analysis",
+        "application": "user-service",
+        "fault_type": "k8s_target_port-misconfig",
+        "difficulty": "hard",
+        "aiopslab_problem_id": "k8s_target_port-misconfig-analysis-1"
+      },
+      "expected_root_cause": "k8s_target_port-misconfig_in_user-service",
+      "expected_confidence_min": 0.9,
+      "tags": [
+        "aiopslab",
+        "analysis",
+        "hard",
+        "k8s_target_port-misconfig"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem k8s_target_port-misconfig-analysis-1: k8s_target_port-misconfig in user-service (analysis)",
+      "keywords_for_retrieval": [
+        "analysis",
+        "k8s_target_port-misconfig",
+        "user-service",
+        "hard"
+      ],
+      "severity": "high",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: analysis of k8s_target_port-misconfig in user-service. Difficulty: hard."
+    },
+    {
+      "id": "bc-aiopslab-revoke_auth_mongodb-detection-1",
+      "category": "single_metric",
+      "type": "revoke_auth_mongodb",
+      "alert": {
+        "service": "mongodb-geo",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "mongodb-geo",
+        "fault_type": "revoke_auth_mongodb"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "mongodb-geo",
+        "fault_type": "revoke_auth_mongodb",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "revoke_auth_mongodb-detection-1"
+      },
+      "expected_root_cause": "revoke_auth_mongodb_in_mongodb-geo",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "revoke_auth_mongodb"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem revoke_auth_mongodb-detection-1: revoke_auth_mongodb in mongodb-geo (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "revoke_auth_mongodb",
+        "mongodb-geo",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of revoke_auth_mongodb in mongodb-geo. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-scale_pod_zero_social_net-analysis-1",
+      "category": "compound",
+      "type": "scale_pod_zero_social_net",
+      "alert": {
+        "service": "social_net",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "analysis",
+        "application": "social_net",
+        "fault_type": "scale_pod_zero_social_net"
+      },
+      "evidence": {
+        "task_type": "analysis",
+        "application": "social_net",
+        "fault_type": "scale_pod_zero_social_net",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "scale_pod_zero_social_net-analysis-1"
+      },
+      "expected_root_cause": "scale_pod_zero_social_net_in_social_net",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "analysis",
+        "medium",
+        "scale_pod_zero_social_net"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem scale_pod_zero_social_net-analysis-1: scale_pod_zero_social_net in social_net (analysis)",
+      "keywords_for_retrieval": [
+        "analysis",
+        "scale_pod_zero_social_net",
+        "social_net",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: analysis of scale_pod_zero_social_net in social_net. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-network_loss_hotel_res-detection-1",
+      "category": "single_metric",
+      "type": "network_loss_hotel_res",
+      "alert": {
+        "service": "hotel_res",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "hotel_res",
+        "fault_type": "network_loss_hotel_res"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "hotel_res",
+        "fault_type": "network_loss_hotel_res",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "network_loss_hotel_res-detection-1"
+      },
+      "expected_root_cause": "network_loss_hotel_res_in_hotel_res",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "network_loss_hotel_res"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem network_loss_hotel_res-detection-1: network_loss_hotel_res in hotel_res (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "network_loss_hotel_res",
+        "hotel_res",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of network_loss_hotel_res in hotel_res. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-revoke_auth_mongodb-analysis-2",
+      "category": "compound",
+      "type": "revoke_auth_mongodb",
+      "alert": {
+        "service": "mongodb-rate",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "analysis",
+        "application": "mongodb-rate",
+        "fault_type": "revoke_auth_mongodb"
+      },
+      "evidence": {
+        "task_type": "analysis",
+        "application": "mongodb-rate",
+        "fault_type": "revoke_auth_mongodb",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "revoke_auth_mongodb-analysis-2"
+      },
+      "expected_root_cause": "revoke_auth_mongodb_in_mongodb-rate",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "analysis",
+        "medium",
+        "revoke_auth_mongodb"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem revoke_auth_mongodb-analysis-2: revoke_auth_mongodb in mongodb-rate (analysis)",
+      "keywords_for_retrieval": [
+        "analysis",
+        "revoke_auth_mongodb",
+        "mongodb-rate",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: analysis of revoke_auth_mongodb in mongodb-rate. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-astronomy_shop_product_catalog_service_failure-localization-1",
+      "category": "compound",
+      "type": "astronomy_shop_product_catalog_service_failure",
+      "alert": {
+        "service": "astronomy_shop_product_catalog",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "localization",
+        "application": "astronomy_shop_product_catalog",
+        "fault_type": "astronomy_shop_product_catalog_service_failure"
+      },
+      "evidence": {
+        "task_type": "localization",
+        "application": "astronomy_shop_product_catalog",
+        "fault_type": "astronomy_shop_product_catalog_service_failure",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "astronomy_shop_product_catalog_service_failure-localization-1"
+      },
+      "expected_root_cause": "astronomy_shop_product_catalog_service_failure_in_astronomy_shop_product_catalog",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "localization",
+        "medium",
+        "astronomy_shop_product_catalog_service_failure"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem astronomy_shop_product_catalog_service_failure-localization-1: astronomy_shop_product_catalog_service_failure in astronomy_shop_product_catalog (localization)",
+      "keywords_for_retrieval": [
+        "localization",
+        "astronomy_shop_product_catalog_service_failure",
+        "astronomy_shop_product_catalog",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: localization of astronomy_shop_product_catalog_service_failure in astronomy_shop_product_catalog. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-user_unregistered_mongodb-detection-1",
+      "category": "single_metric",
+      "type": "user_unregistered_mongodb",
+      "alert": {
+        "service": "mongodb-geo",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "mongodb-geo",
+        "fault_type": "user_unregistered_mongodb"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "mongodb-geo",
+        "fault_type": "user_unregistered_mongodb",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "user_unregistered_mongodb-detection-1"
+      },
+      "expected_root_cause": "user_unregistered_mongodb_in_mongodb-geo",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "user_unregistered_mongodb"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem user_unregistered_mongodb-detection-1: user_unregistered_mongodb in mongodb-geo (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "user_unregistered_mongodb",
+        "mongodb-geo",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of user_unregistered_mongodb in mongodb-geo. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-k8s_target_port-misconfig-localization-2",
+      "category": "compound",
+      "type": "k8s_target_port-misconfig",
+      "alert": {
+        "service": "text-service",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "localization",
+        "application": "text-service",
+        "fault_type": "k8s_target_port-misconfig"
+      },
+      "evidence": {
+        "task_type": "localization",
+        "application": "text-service",
+        "fault_type": "k8s_target_port-misconfig",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "k8s_target_port-misconfig-localization-2"
+      },
+      "expected_root_cause": "k8s_target_port-misconfig_in_text-service",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "localization",
+        "medium",
+        "k8s_target_port-misconfig"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem k8s_target_port-misconfig-localization-2: k8s_target_port-misconfig in text-service (localization)",
+      "keywords_for_retrieval": [
+        "localization",
+        "k8s_target_port-misconfig",
+        "text-service",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: localization of k8s_target_port-misconfig in text-service. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-k8s_target_port-misconfig-analysis-2",
+      "category": "regression_guard",
+      "type": "k8s_target_port-misconfig",
+      "alert": {
+        "service": "text-service",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "analysis",
+        "application": "text-service",
+        "fault_type": "k8s_target_port-misconfig"
+      },
+      "evidence": {
+        "task_type": "analysis",
+        "application": "text-service",
+        "fault_type": "k8s_target_port-misconfig",
+        "difficulty": "hard",
+        "aiopslab_problem_id": "k8s_target_port-misconfig-analysis-2"
+      },
+      "expected_root_cause": "k8s_target_port-misconfig_in_text-service",
+      "expected_confidence_min": 0.9,
+      "tags": [
+        "aiopslab",
+        "analysis",
+        "hard",
+        "k8s_target_port-misconfig"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem k8s_target_port-misconfig-analysis-2: k8s_target_port-misconfig in text-service (analysis)",
+      "keywords_for_retrieval": [
+        "analysis",
+        "k8s_target_port-misconfig",
+        "text-service",
+        "hard"
+      ],
+      "severity": "high",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: analysis of k8s_target_port-misconfig in text-service. Difficulty: hard."
+    },
+    {
+      "id": "bc-aiopslab-astronomy_shop_ad_service_high_cpu-localization-1",
+      "category": "compound",
+      "type": "astronomy_shop_ad_service_high_cpu",
+      "alert": {
+        "service": "astronomy_shop_ad_service",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "localization",
+        "application": "astronomy_shop_ad_service",
+        "fault_type": "astronomy_shop_ad_service_high_cpu"
+      },
+      "evidence": {
+        "task_type": "localization",
+        "application": "astronomy_shop_ad_service",
+        "fault_type": "astronomy_shop_ad_service_high_cpu",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "astronomy_shop_ad_service_high_cpu-localization-1"
+      },
+      "expected_root_cause": "astronomy_shop_ad_service_high_cpu_in_astronomy_shop_ad_service",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "localization",
+        "medium",
+        "astronomy_shop_ad_service_high_cpu"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem astronomy_shop_ad_service_high_cpu-localization-1: astronomy_shop_ad_service_high_cpu in astronomy_shop_ad_service (localization)",
+      "keywords_for_retrieval": [
+        "localization",
+        "astronomy_shop_ad_service_high_cpu",
+        "astronomy_shop_ad_service",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: localization of astronomy_shop_ad_service_high_cpu in astronomy_shop_ad_service. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-pod_kill_hotel_res-detection-1",
+      "category": "single_metric",
+      "type": "pod_kill_hotel_res",
+      "alert": {
+        "service": "hotel_res",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "hotel_res",
+        "fault_type": "pod_kill_hotel_res"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "hotel_res",
+        "fault_type": "pod_kill_hotel_res",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "pod_kill_hotel_res-detection-1"
+      },
+      "expected_root_cause": "pod_kill_hotel_res_in_hotel_res",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "pod_kill_hotel_res"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem pod_kill_hotel_res-detection-1: pod_kill_hotel_res in hotel_res (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "pod_kill_hotel_res",
+        "hotel_res",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of pod_kill_hotel_res in hotel_res. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-flower_model_misconfig-detection",
+      "category": "single_metric",
+      "type": "flower_model_misconfig",
+      "alert": {
+        "service": "flower",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "detection",
+        "application": "flower",
+        "fault_type": "flower_model_misconfig"
+      },
+      "evidence": {
+        "task_type": "detection",
+        "application": "flower",
+        "fault_type": "flower_model_misconfig",
+        "difficulty": "easy",
+        "aiopslab_problem_id": "flower_model_misconfig-detection"
+      },
+      "expected_root_cause": "flower_model_misconfig_in_flower",
+      "expected_confidence_min": 0.7,
+      "tags": [
+        "aiopslab",
+        "detection",
+        "easy",
+        "flower_model_misconfig"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem flower_model_misconfig-detection: flower_model_misconfig in flower (detection)",
+      "keywords_for_retrieval": [
+        "detection",
+        "flower_model_misconfig",
+        "flower",
+        "easy"
+      ],
+      "severity": "low",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: detection of flower_model_misconfig in flower. Difficulty: easy."
+    },
+    {
+      "id": "bc-aiopslab-k8s_target_port-misconfig-localization-3",
+      "category": "compound",
+      "type": "k8s_target_port-misconfig",
+      "alert": {
+        "service": "post-storage-service",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "localization",
+        "application": "post-storage-service",
+        "fault_type": "k8s_target_port-misconfig"
+      },
+      "evidence": {
+        "task_type": "localization",
+        "application": "post-storage-service",
+        "fault_type": "k8s_target_port-misconfig",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "k8s_target_port-misconfig-localization-3"
+      },
+      "expected_root_cause": "k8s_target_port-misconfig_in_post-storage-service",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "localization",
+        "medium",
+        "k8s_target_port-misconfig"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem k8s_target_port-misconfig-localization-3: k8s_target_port-misconfig in post-storage-service (localization)",
+      "keywords_for_retrieval": [
+        "localization",
+        "k8s_target_port-misconfig",
+        "post-storage-service",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: localization of k8s_target_port-misconfig in post-storage-service. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-redeploy_without_PV-mitigation-1",
+      "category": "regression_guard",
+      "type": "redeploy_without_PV",
+      "alert": {
+        "service": "default",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "mitigation",
+        "application": "default",
+        "fault_type": "redeploy_without_PV"
+      },
+      "evidence": {
+        "task_type": "mitigation",
+        "application": "default",
+        "fault_type": "redeploy_without_PV",
+        "difficulty": "hard",
+        "aiopslab_problem_id": "redeploy_without_PV-mitigation-1"
+      },
+      "expected_root_cause": "redeploy_without_PV_in_default",
+      "expected_confidence_min": 0.9,
+      "tags": [
+        "aiopslab",
+        "mitigation",
+        "hard",
+        "redeploy_without_PV"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem redeploy_without_PV-mitigation-1: redeploy_without_PV in default (mitigation)",
+      "keywords_for_retrieval": [
+        "mitigation",
+        "redeploy_without_PV",
+        "default",
+        "hard"
+      ],
+      "severity": "high",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: mitigation of redeploy_without_PV in default. Difficulty: hard."
+    },
+    {
+      "id": "bc-aiopslab-revoke_auth_mongodb-localization-2",
+      "category": "compound",
+      "type": "revoke_auth_mongodb",
+      "alert": {
+        "service": "mongodb-rate",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "localization",
+        "application": "mongodb-rate",
+        "fault_type": "revoke_auth_mongodb"
+      },
+      "evidence": {
+        "task_type": "localization",
+        "application": "mongodb-rate",
+        "fault_type": "revoke_auth_mongodb",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "revoke_auth_mongodb-localization-2"
+      },
+      "expected_root_cause": "revoke_auth_mongodb_in_mongodb-rate",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "localization",
+        "medium",
+        "revoke_auth_mongodb"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem revoke_auth_mongodb-localization-2: revoke_auth_mongodb in mongodb-rate (localization)",
+      "keywords_for_retrieval": [
+        "localization",
+        "revoke_auth_mongodb",
+        "mongodb-rate",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: localization of revoke_auth_mongodb in mongodb-rate. Difficulty: medium."
+    },
+    {
+      "id": "bc-aiopslab-astronomy_shop_payment_service_failure-localization-1",
+      "category": "compound",
+      "type": "astronomy_shop_payment_service_failure",
+      "alert": {
+        "service": "astronomy_shop_payment_service",
+        "metric_name": "task_success_rate",
+        "value": 0.0,
+        "task_type": "localization",
+        "application": "astronomy_shop_payment_service",
+        "fault_type": "astronomy_shop_payment_service_failure"
+      },
+      "evidence": {
+        "task_type": "localization",
+        "application": "astronomy_shop_payment_service",
+        "fault_type": "astronomy_shop_payment_service_failure",
+        "difficulty": "medium",
+        "aiopslab_problem_id": "astronomy_shop_payment_service_failure-localization-1"
+      },
+      "expected_root_cause": "astronomy_shop_payment_service_failure_in_astronomy_shop_payment_service",
+      "expected_confidence_min": 0.8,
+      "tags": [
+        "aiopslab",
+        "localization",
+        "medium",
+        "astronomy_shop_payment_service_failure"
+      ],
+      "badcase_class": "aiopslab_benchmark",
+      "identified_flaw": "AIOpsLab problem astronomy_shop_payment_service_failure-localization-1: astronomy_shop_payment_service_failure in astronomy_shop_payment_service (localization)",
+      "keywords_for_retrieval": [
+        "localization",
+        "astronomy_shop_payment_service_failure",
+        "astronomy_shop_payment_service",
+        "medium"
+      ],
+      "severity": "medium",
+      "eval_split": "dev",
+      "source": "aiopslab",
+      "description": "AIOpsLab benchmark problem: localization of astronomy_shop_payment_service_failure in astronomy_shop_payment_service. Difficulty: medium."
+    }
+  ]
+}

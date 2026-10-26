@@ -1,0 +1,64 @@
+# =============================================================================
+# AIOps Agent Platform - Promtail Production Config
+# =============================================================================#
+# 与 dev 版一致，但调整 client backoff / batchwait，适合生产环境推送
+# 大量容器日志到 Loki。
+# =============================================================================
+
+server:
+  http_listen_port: 9080
+  log_level: info
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+    backoff_config:
+      min_period: 500ms
+      max_period: 5m
+      max_retries: 10
+    batchwait: 1s
+    batchsize: 1048576            # 1MB
+    timeout: 10s
+
+scrape_configs:
+  # ---- Docker 容器日志（核心数据源）----
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+        filters:
+          - name: label
+            values: ["aiops=true"]
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container'
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_service']
+        target_label: 'service'
+      - source_labels: ['__meta_docker_container_label_aiops_service']
+        target_label: 'service'
+      - source_labels: ['__meta_docker_container_label_aiops_environment']
+        target_label: 'environment'
+      - source_labels: ['__meta_docker_container_log_stream']
+        target_label: 'stream'
+    pipeline_stages:
+      - docker: {}
+      - match:
+          selector: '{stream="stdout"}'
+          stages:
+            - regex:
+                expression: '.*level=(?P<level>\w+).*'
+            - labels:
+                level:
+
+  # ---- 后端文件日志（兜底，本地调试用）----
+  - job_name: backend
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: aiops-backend
+          service: aiops-backend
+          __path__: /app/logs/*.log

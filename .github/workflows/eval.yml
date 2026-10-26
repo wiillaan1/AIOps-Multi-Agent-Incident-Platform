@@ -1,0 +1,123 @@
+name: Eval Gate
+
+on:
+  pull_request:
+    branches: [main, master, develop]
+    paths:
+      - "backend/app/eval/**"
+      - "backend/app/evolution/**"
+      - "backend/app/core/llm_*.py"
+      - "backend/app/services/badcase_*.py"
+      - "data/badcases/v1_*.json"
+      - "backend/app/eval/history.py"
+      - "backend/app/eval/evaluator.py"
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: eval-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  eval-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-asyncio
+
+      - name: Run unit tests
+        working-directory: backend
+        env:
+          AIOPS_FORCE_FALLBACK: "1"
+        run: |
+          pytest tests/test_eval_v3_unified.py \
+                tests/test_eval_v3_history.py \
+                tests/test_detection_v3_smd.py \
+                tests/test_self_evolution.py \
+                tests/test_review.py \
+                tests/test_badcase_eval.py \
+            --tb=short -q
+
+      - name: Run eval on dev split
+        working-directory: backend
+        env:
+          AIOPS_FORCE_FALLBACK: "1"
+          EVAL_HISTORY_DB_PATH: ./data/eval_history/history.db
+          EVAL_BASELINES_DIR: ./data/eval_history/baselines
+        run: |
+          python -m app.eval run --split dev --analyzer "ci_${{ github.sha }}" \
+            --note "CI run ${{ github.run_id }}"
+
+      - name: Check eval against baseline
+        working-directory: backend
+        env:
+          AIOPS_FORCE_FALLBACK: "1"
+          EVAL_HISTORY_DB_PATH: ./data/eval_history/history.db
+          EVAL_BASELINES_DIR: ./data/eval_history/baselines
+        run: |
+          # 第一次跑创建 baseline，后续跑 check_against_baseline
+          if [ ! -f data/eval_history/baselines/rules_engine_baseline.json ]; then
+            echo "📌 Creating initial baseline..."
+            python -m app.eval baseline set rules_engine_baseline --split dev \
+              --description "Initial CI baseline" \
+              --notes "auto-created on first CI run"
+          else
+            echo "📌 Checking against baseline..."
+            python -m app.eval run --split dev --baseline rules_engine_baseline \
+              --analyzer "ci_check_${{ github.sha }}"
+          fi
+
+      - name: Run AIOpsLab leaderboard comparison
+        working-directory: backend
+        env:
+          AIOPS_FORCE_FALLBACK: "1"
+        run: |
+          python -m app.eval.aiopslab_baseline show 2>&1 | head -20
+
+      - name: Upload eval results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results
+          path: |
+            backend/data/eval_history/history.db
+            backend/data/eval_history/baselines/
+          retention-days: 30
+
+      - name: Comment PR with eval summary
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const path = 'backend/data/eval_history/history.db';
+              if (fs.existsSync(path)) {
+                github.rest.issues.createComment({
+                  owner: context.issue.owner,
+                  repo: context.issue.repo,
+                  issue_number: context.issue.number,
+                  body: '📊 Eval gate passed. See artifact for full results.'
+                });
+              }
+            } catch (e) {
+              core.warning(`Could not post comment: ${e.message}`);
+            }

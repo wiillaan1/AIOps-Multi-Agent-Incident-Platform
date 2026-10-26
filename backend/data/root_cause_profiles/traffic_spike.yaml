@@ -1,0 +1,25 @@
+root_cause: traffic_spike
+version: "1.0"
+manual_only: false
+assertions:
+  - id: target-request-rate-spike
+    source: prometheus
+    query_template: 'sum(rate(http_requests_total{service="{{ service }}",target="{{ target }}"}[5m]))'
+    evidence_level: direct
+    weight: 0.8
+    expectation: {operator: greater_than, threshold: 1000}
+  - id: target-rate-limit-logs
+    source: loki
+    query_template: '{service="{{ service }}",target="{{ target }}"} |= "rate limit"'
+    evidence_level: supporting
+    weight: 0.2
+    expectation: {operator: min_hits, threshold: 1}
+counter_evidence:
+  - id: target-request-rate-normal
+    source: prometheus
+    query_template: 'sum(rate(http_requests_total{service="{{ service }}",target="{{ target }}"}[5m]))'
+    weight: 0.8
+    expectation: {operator: less_than, threshold: 100}
+decision: {minimum_score: 0.65, require_direct_evidence: true, maximum_counter_evidence: 0.3}
+next_strategies: {inconclusive: [expand_traffic_window], contradicted: [test_memory_leak]}
+recovery: {settle_seconds: 30, observation_seconds: 120, consecutive_samples: 3}
